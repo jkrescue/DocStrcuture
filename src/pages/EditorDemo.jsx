@@ -28,6 +28,7 @@ import SearchPanel from '../components/SearchPanel/SearchPanel';
 import TemplateCenter from '../components/TemplateCenter/TemplateCenter';
 import TemplateCenterEnhanced from '../components/TemplateCenter/TemplateCenter_Enhanced';
 import VersionPanel from '../components/VersionPanel/VersionPanel';
+import VersionPanelEnhanced from '../components/VersionPanel/VersionPanel_Enhanced';
 import GraphViewer from '../components/GraphViewer/GraphViewer';
 import { useDocStore } from '../stores/docStore';
 
@@ -57,6 +58,7 @@ const EditorDemo = () => {
   const [templatesExpanded, setTemplatesExpanded] = useState(false);
   const [recentExpanded, setRecentExpanded] = useState(true);
   const [useEnhancedTemplateCenter, setUseEnhancedTemplateCenter] = useState(true);
+  const [useEnhancedVersionPanel, setUseEnhancedVersionPanel] = useState(true);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -158,7 +160,12 @@ const EditorDemo = () => {
           /> : 
           <TemplateCenter onSelectTemplate={createNewDocument} />;
       case 'versions':
-        return <VersionPanel document={currentDocument} />;
+        return useEnhancedVersionPanel ? 
+          <VersionPanelEnhanced 
+            onClose={() => setActivePanel('editor')}
+            document={currentDocument}
+          /> : 
+          <VersionPanel document={currentDocument} />;
       case 'graph':
         return <GraphViewer />;
       case 'editor':
@@ -570,6 +577,28 @@ const EditorDemo = () => {
               >
                 <Sparkles size={14} />
                 {useEnhancedTemplateCenter ? '增强版' : '基础版'}
+              </button>
+            )}
+
+            {activePanel === 'versions' && (
+              <button
+                onClick={() => setUseEnhancedVersionPanel(!useEnhancedVersionPanel)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: useEnhancedVersionPanel ? '#3b82f6' : 'white',
+                  color: useEnhancedVersionPanel ? 'white' : '#6b7280',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                <Zap size={14} />
+                {useEnhancedVersionPanel ? '增强版' : '基础版'}
               </button>
             )}
             
