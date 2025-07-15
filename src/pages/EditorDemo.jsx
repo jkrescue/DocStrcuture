@@ -30,6 +30,7 @@ import TemplateCenterEnhanced from '../components/TemplateCenter/TemplateCenter_
 import VersionPanel from '../components/VersionPanel/VersionPanel';
 import VersionPanelEnhanced from '../components/VersionPanel/VersionPanel_Enhanced';
 import GraphViewer from '../components/GraphViewer/GraphViewer';
+import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -59,6 +60,8 @@ const EditorDemo = () => {
   const [recentExpanded, setRecentExpanded] = useState(true);
   const [useEnhancedTemplateCenter, setUseEnhancedTemplateCenter] = useState(true);
   const [useEnhancedVersionPanel, setUseEnhancedVersionPanel] = useState(true);
+  const [useEnhancedBlockEditor, setUseEnhancedBlockEditor] = useState(true);
+  const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -80,6 +83,14 @@ const EditorDemo = () => {
     addDocument(newDoc);
     setCurrentDocument(newDoc);
     setActivePanel('editor');
+  };
+
+  // 处理新文档创建
+  const handleCreateDocument = (newDoc) => {
+    addDocument(newDoc);
+    setCurrentDocument(newDoc);
+    setActivePanel('editor');
+    setShowNewDocumentModal(false);
   };
 
   // 更新文档标题
@@ -260,6 +271,7 @@ const EditorDemo = () => {
                     blocks={currentDocument.blocks || []}
                     onBlocksChange={handleBlocksChange}
                     editable={true}
+                    enhanced={useEnhancedBlockEditor}
                   />
                 </div>
               ) : (
@@ -277,7 +289,7 @@ const EditorDemo = () => {
                   </p>
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                     <button
-                      onClick={() => createNewDocument()}
+                      onClick={() => setShowNewDocumentModal(true)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -368,7 +380,7 @@ const EditorDemo = () => {
             </div>
             
             <button
-              onClick={() => createNewDocument()}
+              onClick={() => setShowNewDocumentModal(true)}
               style={{
                 width: '100%',
                 display: 'flex',
@@ -558,6 +570,28 @@ const EditorDemo = () => {
           <div style={{ flex: 1 }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {activePanel === 'editor' && (
+              <button
+                onClick={() => setUseEnhancedBlockEditor(!useEnhancedBlockEditor)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: useEnhancedBlockEditor ? '#3b82f6' : 'white',
+                  color: useEnhancedBlockEditor ? 'white' : '#6b7280',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                <Sparkles size={14} />
+                {useEnhancedBlockEditor ? '增强编辑器' : '基础编辑器'}
+              </button>
+            )}
+
             {activePanel === 'templates' && (
               <button
                 onClick={() => setUseEnhancedTemplateCenter(!useEnhancedTemplateCenter)}
@@ -653,6 +687,13 @@ const EditorDemo = () => {
           {renderMainContent()}
         </div>
       </div>
+
+      {/* 新建文档模态框 */}
+      <NewDocumentModal
+        isOpen={showNewDocumentModal}
+        onClose={() => setShowNewDocumentModal(false)}
+        onCreateDocument={handleCreateDocument}
+      />
     </div>
   );
 };
