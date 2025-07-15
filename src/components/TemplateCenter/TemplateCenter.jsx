@@ -31,27 +31,27 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
 
   const renderTemplatePreview = (template) => {
     return (
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h4 className="font-medium text-gray-800 mb-3">模板预览</h4>
-        <div className="space-y-2">
+      <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px' }}>
+        <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>模板预览</h4>
+        <div>
           {template.blocks.map((block, index) => (
-            <div key={index} className="text-sm">
+            <div key={index} style={{ fontSize: '14px', marginBottom: '8px' }}>
               {block.type === 'text' && (
-                <div className="bg-white p-2 rounded border-l-2 border-blue-200">
-                  <span className="text-gray-500 text-xs">文本块</span>
-                  <div className="text-gray-700">{block.content.text}</div>
+                <div style={{ backgroundColor: '#ffffff', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #bfdbfe' }}>
+                  <span style={{ color: '#6b7280', fontSize: '12px' }}>文本块</span>
+                  <div style={{ color: '#374151' }}>{block.content.text}</div>
                 </div>
               )}
               {block.type === 'field' && (
-                <div className="bg-white p-2 rounded border-l-2 border-green-200">
-                  <span className="text-gray-500 text-xs">字段 - {block.content.fieldType}</span>
-                  <div className="text-gray-700">{block.content.label}</div>
+                <div style={{ backgroundColor: '#ffffff', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #bbf7d0' }}>
+                  <span style={{ color: '#6b7280', fontSize: '12px' }}>字段 - {block.content.fieldType}</span>
+                  <div style={{ color: '#374151' }}>{block.content.label}</div>
                 </div>
               )}
               {block.type === 'table' && (
-                <div className="bg-white p-2 rounded border-l-2 border-purple-200">
-                  <span className="text-gray-500 text-xs">表格</span>
-                  <div className="text-gray-700">{block.content.title}</div>
+                <div style={{ backgroundColor: '#ffffff', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #e9d5ff' }}>
+                  <span style={{ color: '#6b7280', fontSize: '12px' }}>表格</span>
+                  <div style={{ color: '#374151' }}>{block.content.title}</div>
                 </div>
               )}
             </div>
@@ -62,47 +62,94 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-5/6 flex">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+      <div style={{ flex: 1, display: 'flex' }}>
         {/* 左侧边栏 */}
-        <div className="w-1/4 border-r bg-gray-50 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">模板中心</h2>
+        <div style={{ width: '25%', borderRight: '1px solid #e5e7eb', backgroundColor: '#f9fafb', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: 0 }}>模板中心</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              style={{
+                color: '#6b7280',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px',
+                padding: '4px',
+                lineHeight: 1
+              }}
+              onMouseOver={(e) => e.target.style.color = '#374151'}
+              onMouseOut={(e) => e.target.style.color = '#6b7280'}
             >
               ✕
             </button>
           </div>
 
           {/* 搜索框 */}
-          <div className="mb-6">
+          <div style={{ marginBottom: '24px' }}>
             <input
               type="text"
               placeholder="搜索模板..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                outline: 'none',
+                fontSize: '14px'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
 
           {/* 分类筛选 */}
-          <div className="space-y-2">
-            <h3 className="font-medium text-gray-700 mb-3">分类</h3>
+          <div style={{ marginBottom: '32px' }}>
+            <h3 style={{ fontWeight: '500', color: '#374151', marginBottom: '12px', fontSize: '14px' }}>分类</h3>
             {categories.map(category => (
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`w-full text-left p-2 rounded-lg transition-colors ${
-                  selectedCategory === category.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'hover:bg-gray-100 text-gray-700'
-                }`}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  marginBottom: '4px',
+                  backgroundColor: selectedCategory === category.id ? '#dbeafe' : 'transparent',
+                  color: selectedCategory === category.id ? '#1d4ed8' : '#374151',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  if (selectedCategory !== category.id) {
+                    e.target.style.backgroundColor = '#f3f4f6';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (selectedCategory !== category.id) {
+                    e.target.style.backgroundColor = 'transparent';
+                  }
+                }}
               >
-                <div className="flex justify-between items-center">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span>{category.name}</span>
-                  <span className="text-sm bg-gray-200 px-2 py-1 rounded">
+                  <span style={{
+                    fontSize: '12px',
+                    backgroundColor: '#e5e7eb',
+                    padding: '2px 8px',
+                    borderRadius: '12px'
+                  }}>
                     {category.count}
                   </span>
                 </div>
@@ -111,23 +158,47 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
           </div>
 
           {/* 创建新模板 */}
-          <div className="mt-8">
-            <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors">
-              <Plus size={20} className="mx-auto mb-1" />
-              <div className="text-sm">创建新模板</div>
+          <div>
+            <button style={{
+              width: '100%',
+              padding: '12px',
+              border: '2px dashed #d1d5db',
+              borderRadius: '8px',
+              color: '#6b7280',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              textAlign: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.borderColor = '#93c5fd';
+              e.target.style.color = '#2563eb';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.borderColor = '#d1d5db';
+              e.target.style.color = '#6b7280';
+            }}>
+              <Plus size={20} style={{ margin: '0 auto 4px' }} />
+              <div style={{ fontSize: '14px' }}>创建新模板</div>
             </button>
           </div>
         </div>
 
         {/* 中间模板列表 */}
-        <div className="w-2/5 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-800">
+        <div style={{ width: '40%', padding: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 style={{ fontWeight: '500', color: '#1f2937', margin: 0 }}>
               {filteredTemplates.length} 个模板
             </h3>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: '14px', color: '#6b7280', gap: '8px' }}>
               <span>排序:</span>
-              <select className="border border-gray-300 rounded px-2 py-1">
+              <select style={{
+                border: '1px solid #d1d5db',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                fontSize: '14px',
+                outline: 'none'
+              }}>
                 <option>最新创建</option>
                 <option>使用频率</option>
                 <option>名称排序</option>
@@ -135,39 +206,73 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
             </div>
           </div>
 
-          <div className="space-y-4 overflow-y-auto max-h-full">
+          <div style={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: '8px' }}>
             {filteredTemplates.map(template => (
               <div
                 key={template.id}
                 onClick={() => setSelectedTemplate(template)}
-                className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  selectedTemplate?.id === template.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                }`}
+                style={{
+                  padding: '16px',
+                  border: selectedTemplate?.id === template.id ? '1px solid #3b82f6' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  marginBottom: '16px',
+                  backgroundColor: selectedTemplate?.id === template.id ? '#eff6ff' : '#ffffff',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  if (selectedTemplate?.id !== template.id) {
+                    e.currentTarget.style.borderColor = '#d1d5db';
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (selectedTemplate?.id !== template.id) {
+                    e.currentTarget.style.borderColor = '#e5e7eb';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
+                }}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <FileText size={16} className="text-blue-600" />
-                    <h4 className="font-medium text-gray-900">{template.name}</h4>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FileText size={16} style={{ color: '#2563eb' }} />
+                    <h4 style={{ fontWeight: '500', color: '#111827', margin: 0 }}>{template.name}</h4>
                     {template.featured && (
-                      <Star size={14} className="text-yellow-500 fill-current" />
+                      <Star size={14} style={{ color: '#eab308', fill: 'currentColor' }} />
                     )}
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleApplyTemplate(template.id);
                       }}
-                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                      style={{
+                        padding: '4px',
+                        color: '#2563eb',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                      onMouseOver={(e) => e.target.style.backgroundColor = '#dbeafe'}
+                      onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
                       title="使用模板"
                     >
                       <Plus size={14} />
                     </button>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1 text-gray-500 hover:bg-gray-100 rounded"
+                      style={{
+                        padding: '4px',
+                        color: '#6b7280',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                      onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                      onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
                       title="预览"
                     >
                       <Eye size={14} />
@@ -175,20 +280,24 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                <p style={{ fontSize: '14px', color: '#4b5563', marginBottom: '12px' }}>{template.description}</p>
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center space-x-1">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <User size={12} />
                       <span>系统</span>
                     </span>
-                    <span className="flex items-center space-x-1">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <Clock size={12} />
                       <span>2天前</span>
                     </span>
                   </div>
-                  <span className="bg-gray-100 px-2 py-1 rounded">
+                  <span style={{
+                    backgroundColor: '#f3f4f6',
+                    padding: '2px 8px',
+                    borderRadius: '12px'
+                  }}>
                     {template.blocks.length} 个块
                   </span>
                 </div>
@@ -198,67 +307,88 @@ const TemplateCenter = ({ onClose, onApplyTemplate }) => {
         </div>
 
         {/* 右侧预览 */}
-        <div className="w-2/5 p-6 bg-gray-50">
+        <div style={{ width: '35%', padding: '24px', backgroundColor: '#f9fafb' }}>
           {selectedTemplate ? (
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900">{selectedTemplate.name}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h3 style={{ fontWeight: 'bold', color: '#111827', margin: 0 }}>{selectedTemplate.name}</h3>
                 <button
                   onClick={() => handleApplyTemplate(selectedTemplate.id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}
                 >
                   使用此模板
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-6">{selectedTemplate.description}</p>
+              <p style={{ color: '#4b5563', marginBottom: '24px' }}>{selectedTemplate.description}</p>
 
               {renderTemplatePreview(selectedTemplate)}
 
               {/* 模板信息 */}
-              <div className="mt-6 p-4 bg-white rounded-lg">
-                <h4 className="font-medium text-gray-800 mb-3">模板信息</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">包含块数:</span>
-                    <span className="text-gray-700">{selectedTemplate.blocks.length}</span>
+              <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#ffffff', borderRadius: '8px' }}>
+                <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>模板信息</h4>
+                <div style={{ fontSize: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#6b7280' }}>包含块数:</span>
+                    <span style={{ color: '#374151' }}>{selectedTemplate.blocks.length}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">创建时间:</span>
-                    <span className="text-gray-700">2024-01-15</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#6b7280' }}>创建时间:</span>
+                    <span style={{ color: '#374151' }}>2024-01-15</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">使用次数:</span>
-                    <span className="text-gray-700">156</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ color: '#6b7280' }}>使用次数:</span>
+                    <span style={{ color: '#374151' }}>156</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">最后更新:</span>
-                    <span className="text-gray-700">2天前</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#6b7280' }}>最后更新:</span>
+                    <span style={{ color: '#374151' }}>2天前</span>
                   </div>
                 </div>
               </div>
 
               {/* 相关模板 */}
-              <div className="mt-6">
-                <h4 className="font-medium text-gray-800 mb-3">相关模板</h4>
-                <div className="space-y-2">
+              <div style={{ marginTop: '24px' }}>
+                <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>相关模板</h4>
+                <div>
                   {templates.filter(t => t.id !== selectedTemplate.id).slice(0, 2).map(template => (
                     <div
                       key={template.id}
                       onClick={() => setSelectedTemplate(template)}
-                      className="p-2 bg-white rounded border hover:border-blue-300 cursor-pointer transition-colors"
+                      style={{
+                        padding: '8px',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '4px',
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        marginBottom: '8px',
+                        transition: 'border-color 0.2s'
+                      }}
+                      onMouseOver={(e) => e.target.style.borderColor = '#93c5fd'}
+                      onMouseOut={(e) => e.target.style.borderColor = '#e5e7eb'}
                     >
-                      <div className="text-sm font-medium text-gray-700">{template.name}</div>
-                      <div className="text-xs text-gray-500">{template.description}</div>
+                      <div style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>{template.name}</div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>{template.description}</div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <div className="text-center">
-                <FileText size={48} className="mx-auto mb-4 opacity-50" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#6b7280' }}>
+              <div style={{ textAlign: 'center' }}>
+                <FileText size={48} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
                 <p>选择左侧模板查看详情</p>
               </div>
             </div>
