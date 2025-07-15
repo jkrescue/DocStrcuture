@@ -117,290 +117,575 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-5/6 flex flex-col">
-        {/* 头部搜索区域 */}
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">搜索文档</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <X size={20} />
-            </button>
-          </div>
+    <div style={{ 
+      height: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      backgroundColor: 'white'
+    }}>
+      {/* 头部搜索区域 */}
+      <div style={{ 
+        padding: '20px 40px', 
+        borderBottom: '1px solid #f1f5f9',
+        backgroundColor: 'white'
+      }}>
+        <div style={{ marginBottom: '16px' }}>
+          <h2 style={{ 
+            fontSize: '28px', 
+            fontWeight: '600', 
+            color: '#1f2937',
+            margin: 0 
+          }}>
+            全局搜索
+          </h2>
+          <p style={{ 
+            fontSize: '14px', 
+            color: '#6b7280', 
+            margin: '4px 0 0 0' 
+          }}>
+            在所有文档和内容块中搜索
+          </p>
+        </div>
 
-          {/* 主搜索框 */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="搜索文档内容、标题、字段..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+        {/* 主搜索框 */}
+        <div style={{ position: 'relative', marginBottom: '16px' }}>
+          <Search 
+            style={{ 
+              position: 'absolute', 
+              left: '12px', 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              color: '#9ca3af' 
+            }} 
+            size={20} 
+          />
+          <input
+            type="text"
+            placeholder="搜索文档内容、标题、字段..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+            style={{
+              width: '100%',
+              paddingLeft: '40px',
+              paddingRight: '16px',
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              outline: 'none',
+              fontSize: '16px'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+          />
+        </div>
+
+        {/* 高级筛选 */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#6b7280',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 0'
+            }}
+          >
+            <Filter size={16} />
+            <span>高级筛选</span>
+            <ChevronDown 
+              size={16} 
+              style={{
+                transform: showAdvancedFilters ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease'
+              }}
             />
-          </div>
-
-          {/* 高级筛选 */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
-            >
-              <Filter size={16} />
-              <span>高级筛选</span>
-              <ChevronDown 
-                size={16} 
-                className={`transform transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`}
-              />
-            </button>
-            
-            {searchQuery && (
-              <div className="text-sm text-gray-500">
-                找到 {searchResults.length} 个结果
-              </div>
-            )}
-          </div>
-
-          {/* 高级筛选面板 */}
-          {showAdvancedFilters && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <div className="grid grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">块类型</label>
-                  <select
-                    value={filters.blockType}
-                    onChange={(e) => setFilters(prev => ({ ...prev, blockType: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded"
-                  >
-                    {blockTypes.map(type => (
-                      <option key={type.id} value={type.id}>{type.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">时间范围</label>
-                  <select
-                    value={filters.dateRange}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded"
-                  >
-                    {dateRanges.map(range => (
-                      <option key={range.id} value={range.id}>{range.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">作者</label>
-                  <select
-                    value={filters.author}
-                    onChange={(e) => setFilters(prev => ({ ...prev, author: e.target.value }))}
-                    className="w-full p-2 border border-gray-300 rounded"
-                  >
-                    {authors.map(author => (
-                      <option key={author.id} value={author.id}>{author.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
-                  <div className="flex flex-wrap gap-1">
-                    {availableTags.slice(0, 3).map(tag => (
-                      <button
-                        key={tag}
-                        onClick={() => {
-                          const newTags = filters.tags.includes(tag)
-                            ? filters.tags.filter(t => t !== tag)
-                            : [...filters.tags, tag];
-                          setFilters(prev => ({ ...prev, tags: newTags }));
-                        }}
-                        className={`px-2 py-1 text-xs rounded ${
-                          filters.tags.includes(tag)
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          </button>
+          
+          {searchQuery && (
+            <div style={{ fontSize: '14px', color: '#6b7280' }}>
+              找到 {searchResults.length} 个结果
             </div>
           )}
         </div>
 
-        {/* 主内容区域 */}
-        <div className="flex-1 flex">
-          {/* 左侧搜索结果 */}
-          <div className="flex-1 p-6">
-            {!searchQuery ? (
+        {/* 高级筛选面板 */}
+        {showAdvancedFilters && (
+          <div style={{ 
+            marginTop: '16px', 
+            padding: '16px', 
+            backgroundColor: '#f8fafc', 
+            borderRadius: '8px' 
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
               <div>
-                {/* 搜索建议 */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-800 mb-3">搜索建议</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button className="p-3 border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                      <div className="font-medium text-gray-800">📄 最近的文档</div>
-                      <div className="text-sm text-gray-500">查看最近编辑的内容</div>
-                    </button>
-                    <button className="p-3 border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                      <div className="font-medium text-gray-800">📝 待处理项目</div>
-                      <div className="text-sm text-gray-500">查看需要完成的任务</div>
-                    </button>
-                    <button className="p-3 border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                      <div className="font-medium text-gray-800">🔗 引用关系</div>
-                      <div className="text-sm text-gray-500">探索文档间的联系</div>
-                    </button>
-                    <button className="p-3 border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                      <div className="font-medium text-gray-800">📊 数据统计</div>
-                      <div className="text-sm text-gray-500">查看表格和数据分析</div>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 搜索历史 */}
-                {searchHistory.length > 0 && (
-                  <div>
-                    <h3 className="font-medium text-gray-800 mb-3">最近搜索</h3>
-                    <div className="space-y-2">
-                      {searchHistory.map((query, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-2 hover:bg-gray-50 rounded group"
-                        >
-                          <button
-                            onClick={() => handleSearch(query)}
-                            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800"
-                          >
-                            <Clock size={14} />
-                            <span>{query}</span>
-                          </button>
-                          <button
-                            onClick={() => removeFromHistory(query)}
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <label style={{ 
+                  display: 'block', 
+                  fontSize: '14px', 
+                  fontWeight: '500', 
+                  color: '#374151', 
+                  marginBottom: '4px' 
+                }}>
+                  块类型
+                </label>
+                <select
+                  value={filters.blockType}
+                  onChange={(e) => setFilters(prev => ({ ...prev, blockType: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px'
+                  }}
+                >
+                  {blockTypes.map(type => (
+                    <option key={type.id} value={type.id}>{type.name}</option>
+                  ))}
+                </select>
               </div>
-            ) : (
+
               <div>
-                {/* 搜索结果 */}
-                <div className="space-y-4">
-                  {searchResults.map((block, index) => (
-                    <div
-                      key={block.id}
-                      onClick={() => handleSelectBlock(block)}
-                      className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm cursor-pointer transition-all"
+                <label style={{ 
+                  display: 'block', 
+                  fontSize: '14px', 
+                  fontWeight: '500', 
+                  color: '#374151', 
+                  marginBottom: '4px' 
+                }}>
+                  时间范围
+                </label>
+                <select
+                  value={filters.dateRange}
+                  onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px'
+                  }}
+                >
+                  {dateRanges.map(range => (
+                    <option key={range.id} value={range.id}>{range.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  fontSize: '14px', 
+                  fontWeight: '500', 
+                  color: '#374151', 
+                  marginBottom: '4px' 
+                }}>
+                  作者
+                </label>
+                <select
+                  value={filters.author}
+                  onChange={(e) => setFilters(prev => ({ ...prev, author: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '4px'
+                  }}
+                >
+                  {authors.map(author => (
+                    <option key={author.id} value={author.id}>{author.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ 
+                  display: 'block', 
+                  fontSize: '14px', 
+                  fontWeight: '500', 
+                  color: '#374151', 
+                  marginBottom: '4px' 
+                }}>
+                  标签
+                </label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  {availableTags.slice(0, 3).map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => {
+                        const newTags = filters.tags.includes(tag)
+                          ? filters.tags.filter(t => t !== tag)
+                          : [...filters.tags, tag];
+                        setFilters(prev => ({ ...prev, tags: newTags }));
+                      }}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: '12px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        backgroundColor: filters.tags.includes(tag) ? '#eff6ff' : '#f3f4f6',
+                        color: filters.tags.includes(tag) ? '#1d4ed8' : '#6b7280'
+                      }}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg">{getBlockIcon(block.type)}</span>
-                          <div>
-                            <div className="font-medium text-gray-800">
-                              {block.type === 'text' && block.content.text?.split('\n')[0]}
-                              {block.type === 'field' && block.content.label}
-                              {block.type === 'table' && block.content.title}
-                              {block.type === 'reference' && '引用块'}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {block.type} • {block.lastModified} • {block.author}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {block.tags.map(tag => (
-                            <span
-                              key={tag}
-                              className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      {block.highlight && (
-                        <div className="text-sm text-gray-600 bg-yellow-50 p-2 rounded">
-                          ...{block.highlight}...
-                        </div>
-                      )}
-                    </div>
+                      {tag}
+                    </button>
                   ))}
                 </div>
-
-                {searchResults.length === 0 && searchQuery && (
-                  <div className="text-center py-12 text-gray-500">
-                    <Search size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg mb-2">未找到相关内容</p>
-                    <p>尝试调整搜索关键词或使用高级筛选</p>
-                  </div>
-                )}
               </div>
-            )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 主内容区域 */}
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* 左侧搜索结果 */}
+        <div style={{ flex: 1, padding: '20px 40px', overflow: 'auto' }}>
+          {!searchQuery ? (
+            <div>
+              {/* 搜索建议 */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ 
+                  fontWeight: '500', 
+                  color: '#1f2937', 
+                  marginBottom: '12px', 
+                  fontSize: '16px' 
+                }}>
+                  搜索建议
+                </h3>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                  gap: '12px' 
+                }}>
+                  <button style={{
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+                  onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  >
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>📄 最近的文档</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>查看最近编辑的内容</div>
+                  </button>
+                  <button style={{
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+                  onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  >
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>📝 待处理项目</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>查看需要完成的任务</div>
+                  </button>
+                  <button style={{
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+                  onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  >
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>🔗 引用关系</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>探索文档间的联系</div>
+                  </button>
+                  <button style={{
+                    padding: '12px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+                  onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  >
+                    <div style={{ fontWeight: '500', color: '#1f2937' }}>📊 数据统计</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>查看表格和数据分析</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* 搜索历史 */}
+              {searchHistory.length > 0 && (
+                <div>
+                  <h3 style={{ 
+                    fontWeight: '500', 
+                    color: '#1f2937', 
+                    marginBottom: '12px', 
+                    fontSize: '16px' 
+                  }}>
+                    最近搜索
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {searchHistory.map((query, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f8fafc'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      >
+                        <button
+                          onClick={() => handleSearch(query)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            color: '#6b7280',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Clock size={14} />
+                          <span>{query}</span>
+                        </button>
+                        <button
+                          onClick={() => removeFromHistory(query)}
+                          style={{
+                            color: '#9ca3af',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              {/* 搜索结果 */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {searchResults.map((block, index) => (
+                  <div
+                    key={block.id}
+                    onClick={() => handleSelectBlock(block)}
+                    style={{
+                      padding: '16px',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = '#93c5fd';
+                      e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = '#e5e7eb';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'flex-start', 
+                      justifyContent: 'space-between', 
+                      marginBottom: '8px' 
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '18px' }}>{getBlockIcon(block.type)}</span>
+                        <div>
+                          <div style={{ fontWeight: '500', color: '#1f2937' }}>
+                            {block.type === 'text' && block.content.text?.split('\n')[0]}
+                            {block.type === 'field' && block.content.label}
+                            {block.type === 'table' && block.content.title}
+                            {block.type === 'reference' && '引用块'}
+                          </div>
+                          <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                            {block.type} • {block.lastModified} • {block.author}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {block.tags.map(tag => (
+                          <span
+                            key={tag}
+                            style={{
+                              padding: '2px 8px',
+                              fontSize: '12px',
+                              backgroundColor: '#f3f4f6',
+                              color: '#6b7280',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {block.highlight && (
+                      <div style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        backgroundColor: '#fefce8',
+                        padding: '8px',
+                        borderRadius: '4px'
+                      }}>
+                        ...{block.highlight}...
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {searchResults.length === 0 && searchQuery && (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '48px 20px', 
+                  color: '#6b7280' 
+                }}>
+                  <Search size={48} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
+                  <p style={{ fontSize: '18px', marginBottom: '8px' }}>未找到相关内容</p>
+                  <p>尝试调整搜索关键词或使用高级筛选</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 右侧快捷操作 */}
+        <div style={{ 
+          width: '320px', 
+          borderLeft: '1px solid #e5e7eb', 
+          backgroundColor: '#f8fafc', 
+          padding: '20px' 
+        }}>
+          <h3 style={{ 
+            fontWeight: '500', 
+            color: '#1f2937', 
+            marginBottom: '16px', 
+            fontSize: '16px' 
+          }}>
+            快捷操作
+          </h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+            onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={16} style={{ color: '#2563eb' }} />
+                <span style={{ fontWeight: '500' }}>新建文档</span>
+              </div>
+              <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                创建一个新的文档
+              </div>
+            </button>
+
+            <button style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+            onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Tag size={16} style={{ color: '#059669' }} />
+                <span style={{ fontWeight: '500' }}>管理标签</span>
+              </div>
+              <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                添加或编辑标签
+              </div>
+            </button>
+
+            <button style={{
+              width: '100%',
+              padding: '12px',
+              backgroundColor: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.borderColor = '#93c5fd'}
+            onMouseLeave={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={16} style={{ color: '#7c3aed' }} />
+                <span style={{ fontWeight: '500' }}>查看日历</span>
+              </div>
+              <div style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
+                按时间查看文档
+              </div>
+            </button>
           </div>
 
-          {/* 右侧快捷操作 */}
-          <div className="w-1/3 border-l bg-gray-50 p-6">
-            <h3 className="font-medium text-gray-800 mb-4">快捷操作</h3>
-            
-            <div className="space-y-3">
-              <button className="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                <div className="flex items-center space-x-2">
-                  <FileText size={16} className="text-blue-600" />
-                  <span className="font-medium">新建文档</span>
-                </div>
-                <div className="text-sm text-gray-500 mt-1">创建一个新的文档</div>
-              </button>
-
-              <button className="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                <div className="flex items-center space-x-2">
-                  <Tag size={16} className="text-green-600" />
-                  <span className="font-medium">管理标签</span>
-                </div>
-                <div className="text-sm text-gray-500 mt-1">添加或编辑标签</div>
-              </button>
-
-              <button className="w-full p-3 bg-white border border-gray-200 rounded-lg text-left hover:border-blue-300 transition-colors">
-                <div className="flex items-center space-x-2">
-                  <Calendar size={16} className="text-purple-600" />
-                  <span className="font-medium">查看日历</span>
-                </div>
-                <div className="text-sm text-gray-500 mt-1">按时间查看文档</div>
-              </button>
-            </div>
-
-            {/* 统计信息 */}
-            <div className="mt-8">
-              <h4 className="font-medium text-gray-800 mb-3">文档统计</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">总文档数:</span>
-                  <span className="text-gray-700">{blocks.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">本周新增:</span>
-                  <span className="text-gray-700">12</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">待处理:</span>
-                  <span className="text-gray-700">5</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">我的收藏:</span>
-                  <span className="text-gray-700">8</span>
-                </div>
+          {/* 统计信息 */}
+          <div style={{ marginTop: '32px' }}>
+            <h4 style={{ 
+              fontWeight: '500', 
+              color: '#1f2937', 
+              marginBottom: '12px', 
+              fontSize: '16px' 
+            }}>
+              文档统计
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>总文档数:</span>
+                <span style={{ color: '#374151' }}>{blocks.length}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>本周新增:</span>
+                <span style={{ color: '#374151' }}>12</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>待处理:</span>
+                <span style={{ color: '#374151' }}>5</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#6b7280' }}>我的收藏:</span>
+                <span style={{ color: '#374151' }}>8</span>
               </div>
             </div>
           </div>
