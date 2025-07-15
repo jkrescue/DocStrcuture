@@ -215,53 +215,136 @@ const GraphViewer = ({ onClose }) => {
   const stats = getNodeStats();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl h-5/6 flex">
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+      <div style={{ flex: 1, display: 'flex' }}>
         {/* 主图谱区域 */}
-        <div className="flex-1 relative">
-          <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-bold text-gray-900 bg-white px-3 py-1 rounded shadow">
+        <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ position: 'absolute', top: '16px', left: '16px', right: '16px', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h2 style={{ 
+                fontSize: '20px', 
+                fontWeight: 'bold', 
+                color: '#111827', 
+                backgroundColor: '#ffffff', 
+                padding: '4px 12px', 
+                borderRadius: '4px', 
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                margin: 0
+              }}>
                 引用关系图谱
               </h2>
-              <div className="bg-white px-3 py-1 rounded shadow text-sm text-gray-600">
+              <div style={{ 
+                backgroundColor: '#ffffff', 
+                padding: '4px 12px', 
+                borderRadius: '4px', 
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', 
+                fontSize: '14px', 
+                color: '#4b5563' 
+              }}>
                 {stats.total} 个节点 • {stats.connections} 个连接
               </div>
             </div>
             
             <button
               onClick={onClose}
-              className="bg-white text-gray-500 hover:text-gray-700 p-2 rounded shadow"
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#6b7280',
+                border: 'none',
+                padding: '8px',
+                borderRadius: '4px',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#374151'}
+              onMouseOut={(e) => e.target.style.color = '#6b7280'}
             >
               ✕
             </button>
           </div>
 
           {/* 工具栏 */}
-          <div className="absolute top-16 left-4 z-10 bg-white rounded shadow p-2 space-y-2">
+          <div style={{ 
+            position: 'absolute', 
+            top: '64px', 
+            left: '16px', 
+            zIndex: 10, 
+            backgroundColor: '#ffffff', 
+            borderRadius: '4px', 
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', 
+            padding: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
             <button
               onClick={() => handleZoom(0.1)}
-              className="p-2 hover:bg-gray-100 rounded"
+              style={{
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               title="放大"
             >
               <ZoomIn size={16} />
             </button>
             <button
               onClick={() => handleZoom(-0.1)}
-              className="p-2 hover:bg-gray-100 rounded"
+              style={{
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               title="缩小"
             >
               <ZoomOut size={16} />
             </button>
             <button
               onClick={resetView}
-              className="p-2 hover:bg-gray-100 rounded"
+              style={{
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               title="重置视图"
             >
               <RotateCcw size={16} />
             </button>
             <button
-              className="p-2 hover:bg-gray-100 rounded"
+              style={{
+                padding: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               title="设置"
             >
               <Settings size={16} />
@@ -269,8 +352,17 @@ const GraphViewer = ({ onClose }) => {
           </div>
 
           {/* 视图模式切换 */}
-          <div className="absolute top-16 right-4 z-10 bg-white rounded shadow p-1">
-            <div className="flex space-x-1">
+          <div style={{ 
+            position: 'absolute', 
+            top: '64px', 
+            right: '16px', 
+            zIndex: 10, 
+            backgroundColor: '#ffffff', 
+            borderRadius: '4px', 
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', 
+            padding: '4px' 
+          }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
               {[
                 { id: 'references', name: '引用关系' },
                 { id: 'hierarchy', name: '层级结构' },
@@ -279,11 +371,22 @@ const GraphViewer = ({ onClose }) => {
                 <button
                   key={mode.id}
                   onClick={() => setViewMode(mode.id)}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${
-                    viewMode === mode.id
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
+                  style={{
+                    padding: '4px 12px',
+                    fontSize: '14px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: viewMode === mode.id ? '#dbeafe' : 'transparent',
+                    color: viewMode === mode.id ? '#1d4ed8' : '#4b5563',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    if (viewMode !== mode.id) e.target.style.backgroundColor = '#f3f4f6';
+                  }}
+                  onMouseOut={(e) => {
+                    if (viewMode !== mode.id) e.target.style.backgroundColor = 'transparent';
+                  }}
                 >
                   {mode.name}
                 </button>
@@ -294,7 +397,7 @@ const GraphViewer = ({ onClose }) => {
           {/* 画布 */}
           <canvas
             ref={canvasRef}
-            className="w-full h-full cursor-move"
+            style={{ width: '100%', height: '100%', cursor: 'move' }}
             onClick={handleCanvasClick}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -303,52 +406,74 @@ const GraphViewer = ({ onClose }) => {
           />
 
           {/* 图例 */}
-          <div className="absolute bottom-4 left-4 bg-white rounded shadow p-3">
-            <h4 className="font-medium text-gray-800 mb-2">图例</h4>
-            <div className="space-y-1 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '16px', 
+            left: '16px', 
+            backgroundColor: '#ffffff', 
+            borderRadius: '4px', 
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', 
+            padding: '12px' 
+          }}>
+            <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>图例</h4>
+            <div style={{ fontSize: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#3b82f6' }}></div>
                 <span>文本块</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
                 <span>字段块</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#8b5cf6' }}></div>
                 <span>表格块</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></div>
                 <span>引用块</span>
               </div>
             </div>
           </div>
 
           {/* 缩放信息 */}
-          <div className="absolute bottom-4 right-4 bg-white rounded shadow px-3 py-1 text-sm text-gray-600">
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '16px', 
+            right: '16px', 
+            backgroundColor: '#ffffff', 
+            borderRadius: '4px', 
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', 
+            padding: '4px 12px', 
+            fontSize: '14px', 
+            color: '#4b5563' 
+          }}>
             缩放: {Math.round(zoomLevel * 100)}%
           </div>
         </div>
 
         {/* 右侧信息面板 */}
-        <div className="w-80 border-l bg-gray-50 p-6">
+        <div style={{ width: '320px', borderLeft: '1px solid #e5e7eb', backgroundColor: '#f9fafb', padding: '24px' }}>
           {selectedNode ? (
             <div>
-              <h3 className="font-bold text-gray-900 mb-4">节点详情</h3>
+              <h3 style={{ fontWeight: 'bold', color: '#111827', marginBottom: '16px' }}>节点详情</h3>
               
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
+              <div>
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <div 
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: selectedNode.color }}
+                      style={{ 
+                        width: '16px', 
+                        height: '16px', 
+                        borderRadius: '50%',
+                        backgroundColor: selectedNode.color
+                      }}
                     ></div>
-                    <span className="font-medium">{selectedNode.label}</span>
+                    <span style={{ fontWeight: '500' }}>{selectedNode.label}</span>
                   </div>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <div>类型: {selectedNode.type}</div>
-                    <div>ID: {selectedNode.id}</div>
+                  <div style={{ fontSize: '14px', color: '#4b5563' }}>
+                    <div style={{ marginBottom: '4px' }}>类型: {selectedNode.type}</div>
+                    <div style={{ marginBottom: '4px' }}>ID: {selectedNode.id}</div>
                     <div>连接数: {localGraphData.edges.filter(e => 
                       e.from === selectedNode.id || e.to === selectedNode.id
                     ).length}</div>
@@ -356,9 +481,9 @@ const GraphViewer = ({ onClose }) => {
                 </div>
 
                 {/* 节点内容预览 */}
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-2">内容预览</h4>
-                  <div className="text-sm text-gray-600">
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>内容预览</h4>
+                  <div style={{ fontSize: '14px', color: '#4b5563' }}>
                     {selectedNode.type === 'text' && selectedNode.block.content.text}
                     {selectedNode.type === 'field' && (
                       <div>
@@ -379,17 +504,17 @@ const GraphViewer = ({ onClose }) => {
                 </div>
 
                 {/* 关联信息 */}
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-2">关联信息</h4>
-                  <div className="space-y-2 text-sm">
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '8px' }}>关联信息</h4>
+                  <div style={{ fontSize: '14px' }}>
                     {localGraphData.edges
                       .filter(e => e.from === selectedNode.id || e.to === selectedNode.id)
                       .map((edge, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-gray-600">
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ color: '#4b5563' }}>
                             {edge.from === selectedNode.id ? '引用 →' : '← 被引用'}
                           </span>
-                          <span className="text-blue-600">
+                          <span style={{ color: '#2563eb' }}>
                             {edge.from === selectedNode.id ? edge.to : edge.from}
                           </span>
                         </div>
@@ -397,62 +522,73 @@ const GraphViewer = ({ onClose }) => {
                   </div>
                 </div>
 
-                <button className="w-full p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button style={{
+                  width: '100%',
+                  padding: '8px',
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}>
                   跳转到块
                 </button>
               </div>
             </div>
           ) : (
             <div>
-              <h3 className="font-bold text-gray-900 mb-4">图谱统计</h3>
+              <h3 style={{ fontWeight: 'bold', color: '#111827', marginBottom: '16px' }}>图谱统计</h3>
               
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-3">节点统计</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">总节点数:</span>
-                      <span className="font-medium">{stats.total}</span>
+              <div>
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>节点统计</h4>
+                  <div style={{ fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#4b5563' }}>总节点数:</span>
+                      <span style={{ fontWeight: '500' }}>{stats.total}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">文本块:</span>
-                      <span className="font-medium text-blue-600">{stats.text}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#4b5563' }}>文本块:</span>
+                      <span style={{ fontWeight: '500', color: '#2563eb' }}>{stats.text}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">字段块:</span>
-                      <span className="font-medium text-green-600">{stats.field}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#4b5563' }}>字段块:</span>
+                      <span style={{ fontWeight: '500', color: '#059669' }}>{stats.field}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">表格块:</span>
-                      <span className="font-medium text-purple-600">{stats.table}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#4b5563' }}>表格块:</span>
+                      <span style={{ fontWeight: '500', color: '#7c3aed' }}>{stats.table}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">引用块:</span>
-                      <span className="font-medium text-yellow-600">{stats.reference}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-3">连接统计</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">总连接数:</span>
-                      <span className="font-medium">{stats.connections}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">引用关系:</span>
-                      <span className="font-medium">{stats.connections}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#4b5563' }}>引用块:</span>
+                      <span style={{ fontWeight: '500', color: '#d97706' }}>{stats.reference}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-800 mb-3">操作提示</h4>
-                  <div className="space-y-1 text-sm text-gray-600">
-                    <div>• 点击节点查看详情</div>
-                    <div>• 拖拽移动视图</div>
-                    <div>• 使用工具栏缩放</div>
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px', marginBottom: '16px' }}>
+                  <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>连接统计</h4>
+                  <div style={{ fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#4b5563' }}>总连接数:</span>
+                      <span style={{ fontWeight: '500' }}>{stats.connections}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#4b5563' }}>引用关系:</span>
+                      <span style={{ fontWeight: '500' }}>{stats.connections}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#ffffff', padding: '16px', borderRadius: '8px' }}>
+                  <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '12px' }}>操作提示</h4>
+                  <div style={{ fontSize: '14px', color: '#4b5563' }}>
+                    <div style={{ marginBottom: '4px' }}>• 点击节点查看详情</div>
+                    <div style={{ marginBottom: '4px' }}>• 拖拽移动视图</div>
+                    <div style={{ marginBottom: '4px' }}>• 使用工具栏缩放</div>
                     <div>• 切换不同视图模式</div>
                   </div>
                 </div>
