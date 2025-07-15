@@ -6,7 +6,8 @@ import {
   MousePointer, Move, RotateCw, Compass, Map, Database, Activity,
   TrendingUp, BarChart3, PieChart, ArrowRight, ArrowLeft, Shuffle,
   Focus, Expand, Shrink, Grid, List, Hash, Tag, Star, Bookmark,
-  RefreshCw, Zap, Lightbulb, Link, Unlink, Plus, Minus, X, Info
+  RefreshCw, Zap, Lightbulb, Link, Unlink, Plus, Minus, X, Info,
+  Crosshair
 } from 'lucide-react';
 import { useDocStore } from '../../stores/docStore';
 
@@ -43,6 +44,11 @@ const GraphViewerEnhanced = ({ onClose }) => {
   const [showLabels, setShowLabels] = useState(true);
   const [showEdgeLabels, setShowEdgeLabels] = useState(false);
   const [hideIsolated, setHideIsolated] = useState(false);
+  const [showParagraphs, setShowParagraphs] = useState(true);
+  const [showDocuments, setShowDocuments] = useState(true);
+  const [showInternalLinks, setShowInternalLinks] = useState(true);
+  const [showCrossReferences, setShowCrossReferences] = useState(true);
+  const [hierarchyLevel, setHierarchyLevel] = useState('all'); // all, documents, paragraphs
   
   // 分析功能
   const [highlightPath, setHighlightPath] = useState([]);
@@ -64,10 +70,27 @@ const GraphViewerEnhanced = ({ onClose }) => {
     metrics: {}
   });
 
+  // 拖拽相关状态
+  const [dragState, setDragState] = useState({
+    isDragging: false,
+    draggedNode: null,
+    dragOffset: { x: 0, y: 0 },
+    startPos: { x: 0, y: 0 }
+  });
+
+  // 画布交互状态
+  const [canvasState, setCanvasState] = useState({
+    isPanning: false,
+    panStart: { x: 0, y: 0 },
+    transform: { x: 0, y: 0, scale: 1 },
+    bounds: { minX: -1000, maxX: 1000, minY: -1000, maxY: 1000 }
+  });
+
   // 生成增强的假数据
   const generateEnhancedGraphData = useCallback(() => {
-    // 创建更丰富的节点数据
+    // 创建更丰富的节点数据 - 包含文档和段落层级
     const nodes = [
+      // 核心文档节点
       {
         id: 'project_overview',
         type: 'document',
@@ -79,19 +102,151 @@ const GraphViewerEnhanced = ({ onClose }) => {
         color: '#3b82f6',
         importance: 0.9,
         centrality: 0.8,
-        connections: 8,
+        connections: 12,
         lastModified: Date.now() - 86400000,
         author: '张三',
         tags: ['核心', '文档', '概述'],
         content: {
           wordCount: 1200,
           imageCount: 3,
-          references: 5
+          references: 5,
+          paragraphs: 8,
+          sections: ['背景介绍', '项目目标', '技术栈', '团队组织']
         },
         cluster: 'core_docs',
         position: { x: 400, y: 100 },
         velocity: { x: 0, y: 0 },
-        fixed: false
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['overview_p1', 'overview_p2', 'overview_p3', 'overview_p4'],
+        relatedDocs: ['requirements_analysis', 'technical_design'],
+        similarity: {},
+        metrics: {
+          readability: 0.85,
+          completeness: 0.92,
+          relevance: 0.88
+        }
+      },
+      // 项目概述的段落节点
+      {
+        id: 'overview_p1',
+        type: 'paragraph',
+        label: '背景介绍',
+        category: 'introduction',
+        x: 320,
+        y: 180,
+        size: 25,
+        color: '#60a5fa',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 86400000,
+        author: '张三',
+        tags: ['背景', '介绍'],
+        content: {
+          wordCount: 280,
+          imageCount: 1,
+          references: 2,
+          section: '背景介绍'
+        },
+        cluster: 'core_docs',
+        position: { x: 320, y: 180 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'project_overview',
+        order: 1,
+        sentiment: 'neutral',
+        keywords: ['项目背景', '市场需求', '技术趋势']
+      },
+      {
+        id: 'overview_p2',
+        type: 'paragraph',
+        label: '项目目标',
+        category: 'objectives',
+        x: 480,
+        y: 180,
+        size: 28,
+        color: '#60a5fa',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 4,
+        lastModified: Date.now() - 86400000,
+        author: '张三',
+        tags: ['目标', '愿景'],
+        content: {
+          wordCount: 320,
+          imageCount: 0,
+          references: 1,
+          section: '项目目标'
+        },
+        cluster: 'core_docs',
+        position: { x: 480, y: 180 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'project_overview',
+        order: 2,
+        sentiment: 'positive',
+        keywords: ['产品目标', '用户价值', '商业价值']
+      },
+      {
+        id: 'overview_p3',
+        type: 'paragraph',
+        label: '技术栈选择',
+        category: 'technology',
+        x: 360,
+        y: 220,
+        size: 22,
+        color: '#60a5fa',
+        importance: 0.6,
+        centrality: 0.5,
+        connections: 2,
+        lastModified: Date.now() - 86400000,
+        author: '张三',
+        tags: ['技术', '选择'],
+        content: {
+          wordCount: 180,
+          imageCount: 0,
+          references: 0,
+          section: '技术栈'
+        },
+        cluster: 'core_docs',
+        position: { x: 360, y: 220 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'project_overview',
+        order: 3,
+        sentiment: 'neutral',
+        keywords: ['React', 'Node.js', '数据库']
+      },
+      {
+        id: 'overview_p4',
+        type: 'paragraph',
+        label: '团队组织',
+        category: 'organization',
+        x: 440,
+        y: 220,
+        size: 24,
+        color: '#60a5fa',
+        importance: 0.65,
+        centrality: 0.55,
+        connections: 3,
+        lastModified: Date.now() - 86400000,
+        author: '张三',
+        tags: ['团队', '组织'],
+        content: {
+          wordCount: 220,
+          imageCount: 1,
+          references: 1,
+          section: '团队组织'
+        },
+        cluster: 'core_docs',
+        position: { x: 440, y: 220 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'project_overview',
+        order: 4,
+        sentiment: 'positive',
+        keywords: ['开发团队', '角色分工', '协作方式']
       },
       {
         id: 'requirements_analysis',
@@ -99,24 +254,190 @@ const GraphViewerEnhanced = ({ onClose }) => {
         label: '需求分析',
         category: 'requirements',
         x: 200,
-        y: 200,
+        y: 300,
         size: 40,
         color: '#10b981',
         importance: 0.85,
         centrality: 0.75,
-        connections: 6,
+        connections: 10,
         lastModified: Date.now() - 172800000,
         author: '李四',
         tags: ['需求', '分析', '核心'],
         content: {
           wordCount: 2800,
           imageCount: 8,
-          references: 12
+          references: 12,
+          paragraphs: 12,
+          sections: ['用户需求', '功能需求', '非功能需求', '约束条件']
         },
         cluster: 'requirements',
-        position: { x: 200, y: 200 },
+        position: { x: 200, y: 300 },
         velocity: { x: 0, y: 0 },
-        fixed: false
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['req_p1', 'req_p2', 'req_p3', 'req_p4', 'req_p5'],
+        relatedDocs: ['project_overview', 'user_stories', 'technical_design'],
+        similarity: {
+          'project_overview': 0.78,
+          'user_stories': 0.85,
+          'technical_design': 0.72
+        },
+        metrics: {
+          readability: 0.82,
+          completeness: 0.89,
+          relevance: 0.91
+        }
+      },
+      // 需求分析的段落节点
+      {
+        id: 'req_p1',
+        type: 'paragraph',
+        label: '用户画像分析',
+        category: 'user_analysis',
+        x: 120,
+        y: 380,
+        size: 26,
+        color: '#34d399',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 4,
+        lastModified: Date.now() - 172800000,
+        author: '李四',
+        tags: ['用户', '画像'],
+        content: {
+          wordCount: 450,
+          imageCount: 2,
+          references: 3,
+          section: '用户需求'
+        },
+        cluster: 'requirements',
+        position: { x: 120, y: 380 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'requirements_analysis',
+        order: 1,
+        sentiment: 'neutral',
+        keywords: ['目标用户', '用户特征', '使用场景']
+      },
+      {
+        id: 'req_p2',
+        type: 'paragraph',
+        label: '核心功能列表',
+        category: 'feature_list',
+        x: 280,
+        y: 380,
+        size: 30,
+        color: '#34d399',
+        importance: 0.85,
+        centrality: 0.8,
+        connections: 6,
+        lastModified: Date.now() - 172800000,
+        author: '李四',
+        tags: ['功能', '列表'],
+        content: {
+          wordCount: 680,
+          imageCount: 1,
+          references: 4,
+          section: '功能需求'
+        },
+        cluster: 'requirements',
+        position: { x: 280, y: 380 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'requirements_analysis',
+        order: 2,
+        sentiment: 'positive',
+        keywords: ['文档编辑', '协作功能', '版本控制']
+      },
+      {
+        id: 'req_p3',
+        type: 'paragraph',
+        label: '性能要求',
+        category: 'performance',
+        x: 160,
+        y: 420,
+        size: 24,
+        color: '#34d399',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 172800000,
+        author: '李四',
+        tags: ['性能', '要求'],
+        content: {
+          wordCount: 380,
+          imageCount: 3,
+          references: 2,
+          section: '非功能需求'
+        },
+        cluster: 'requirements',
+        position: { x: 160, y: 420 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'requirements_analysis',
+        order: 3,
+        sentiment: 'neutral',
+        keywords: ['响应时间', '并发用户', '可用性']
+      },
+      {
+        id: 'req_p4',
+        type: 'paragraph',
+        label: '安全需求',
+        category: 'security',
+        x: 240,
+        y: 420,
+        size: 27,
+        color: '#34d399',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 4,
+        lastModified: Date.now() - 172800000,
+        author: '李四',
+        tags: ['安全', '需求'],
+        content: {
+          wordCount: 420,
+          imageCount: 0,
+          references: 2,
+          section: '非功能需求'
+        },
+        cluster: 'requirements',
+        position: { x: 240, y: 420 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'requirements_analysis',
+        order: 4,
+        sentiment: 'critical',
+        keywords: ['用户认证', '数据加密', '权限控制']
+      },
+      {
+        id: 'req_p5',
+        type: 'paragraph',
+        label: '技术约束',
+        category: 'constraints',
+        x: 200,
+        y: 460,
+        size: 22,
+        color: '#34d399',
+        importance: 0.6,
+        centrality: 0.5,
+        connections: 2,
+        lastModified: Date.now() - 172800000,
+        author: '李四',
+        tags: ['约束', '技术'],
+        content: {
+          wordCount: 280,
+          imageCount: 0,
+          references: 1,
+          section: '约束条件'
+        },
+        cluster: 'requirements',
+        position: { x: 200, y: 460 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'requirements_analysis',
+        order: 5,
+        sentiment: 'neutral',
+        keywords: ['浏览器兼容', '移动端适配', '第三方集成']
       },
       {
         id: 'technical_design',
@@ -124,24 +445,611 @@ const GraphViewerEnhanced = ({ onClose }) => {
         label: '技术设计',
         category: 'design',
         x: 600,
-        y: 200,
+        y: 300,
         size: 42,
         color: '#8b5cf6',
         importance: 0.88,
         centrality: 0.78,
-        connections: 9,
+        connections: 11,
         lastModified: Date.now() - 259200000,
         author: '王五',
         tags: ['技术', '设计', '架构'],
         content: {
           wordCount: 3200,
           imageCount: 15,
-          references: 18
+          references: 18,
+          paragraphs: 15,
+          sections: ['系统架构', '技术选型', '数据设计', '接口设计']
         },
         cluster: 'technical',
-        position: { x: 600, y: 200 },
+        position: { x: 600, y: 300 },
         velocity: { x: 0, y: 0 },
-        fixed: false
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['tech_p1', 'tech_p2', 'tech_p3', 'tech_p4', 'tech_p5'],
+        relatedDocs: ['project_overview', 'requirements_analysis', 'database_schema', 'api_documentation'],
+        similarity: {
+          'requirements_analysis': 0.72,
+          'database_schema': 0.88,
+          'api_documentation': 0.82
+        },
+        metrics: {
+          readability: 0.75,
+          completeness: 0.94,
+          relevance: 0.86
+        }
+      },
+      // 技术设计的段落节点
+      {
+        id: 'tech_p1',
+        type: 'paragraph',
+        label: '前端架构设计',
+        category: 'frontend',
+        x: 520,
+        y: 380,
+        size: 28,
+        color: '#a78bfa',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 5,
+        lastModified: Date.now() - 259200000,
+        author: '王五',
+        tags: ['前端', '架构'],
+        content: {
+          wordCount: 520,
+          imageCount: 4,
+          references: 3,
+          section: '系统架构'
+        },
+        cluster: 'technical',
+        position: { x: 520, y: 380 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'technical_design',
+        order: 1,
+        sentiment: 'positive',
+        keywords: ['React', '组件化', '状态管理']
+      },
+      {
+        id: 'tech_p2',
+        type: 'paragraph',
+        label: '后端服务架构',
+        category: 'backend',
+        x: 680,
+        y: 380,
+        size: 30,
+        color: '#a78bfa',
+        importance: 0.85,
+        centrality: 0.8,
+        connections: 6,
+        lastModified: Date.now() - 259200000,
+        author: '王五',
+        tags: ['后端', '服务'],
+        content: {
+          wordCount: 680,
+          imageCount: 5,
+          references: 4,
+          section: '系统架构'
+        },
+        cluster: 'technical',
+        position: { x: 680, y: 380 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'technical_design',
+        order: 2,
+        sentiment: 'neutral',
+        keywords: ['微服务', 'API网关', '负载均衡']
+      },
+      {
+        id: 'tech_p3',
+        type: 'paragraph',
+        label: '数据库设计原则',
+        category: 'database',
+        x: 560,
+        y: 420,
+        size: 26,
+        color: '#a78bfa',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 4,
+        lastModified: Date.now() - 259200000,
+        author: '王五',
+        tags: ['数据库', '设计'],
+        content: {
+          wordCount: 420,
+          imageCount: 2,
+          references: 2,
+          section: '数据设计'
+        },
+        cluster: 'technical',
+        position: { x: 560, y: 420 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'technical_design',
+        order: 3,
+        sentiment: 'neutral',
+        keywords: ['关系型数据库', '索引优化', '数据一致性']
+      },
+      {
+        id: 'tech_p4',
+        type: 'paragraph',
+        label: 'API设计规范',
+        category: 'api',
+        x: 640,
+        y: 420,
+        size: 25,
+        color: '#a78bfa',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 259200000,
+        author: '王五',
+        tags: ['API', '规范'],
+        content: {
+          wordCount: 380,
+          imageCount: 1,
+          references: 3,
+          section: '接口设计'
+        },
+        cluster: 'technical',
+        position: { x: 640, y: 420 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'technical_design',
+        order: 4,
+        sentiment: 'neutral',
+        keywords: ['RESTful', '版本控制', '错误处理']
+      },
+      {
+        id: 'tech_p5',
+        type: 'paragraph',
+        label: '性能优化策略',
+        category: 'optimization',
+        x: 600,
+        y: 460,
+        size: 24,
+        color: '#a78bfa',
+        importance: 0.65,
+        centrality: 0.55,
+        connections: 2,
+        lastModified: Date.now() - 259200000,
+        author: '王五',
+        tags: ['性能', '优化'],
+        content: {
+          wordCount: 320,
+          imageCount: 3,
+          references: 2,
+          section: '性能优化'
+        },
+        cluster: 'technical',
+        position: { x: 600, y: 460 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'technical_design',
+        order: 5,
+        sentiment: 'positive',
+        keywords: ['缓存策略', '代码分割', '懒加载']
+      },
+      {
+        id: 'user_stories',
+        type: 'document',
+        label: '用户故事',
+        category: 'requirements',
+        x: 50,
+        y: 550,
+        size: 35,
+        color: '#059669',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 7,
+        lastModified: Date.now() - 345600000,
+        author: '赵六',
+        tags: ['用户', '故事', '需求'],
+        content: {
+          wordCount: 1800,
+          imageCount: 4,
+          references: 8,
+          paragraphs: 10,
+          sections: ['用户场景', '功能描述', '验收标准', '优先级排序']
+        },
+        cluster: 'requirements',
+        position: { x: 50, y: 550 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['story_p1', 'story_p2', 'story_p3'],
+        relatedDocs: ['requirements_analysis', 'ui_design'],
+        similarity: {
+          'requirements_analysis': 0.85,
+          'ui_design': 0.68
+        },
+        metrics: {
+          readability: 0.88,
+          completeness: 0.83,
+          relevance: 0.79
+        }
+      },
+      // 用户故事的段落节点
+      {
+        id: 'story_p1',
+        type: 'paragraph',
+        label: '文档编辑场景',
+        category: 'user_scenario',
+        x: 10,
+        y: 630,
+        size: 22,
+        color: '#10b981',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 345600000,
+        author: '赵六',
+        tags: ['编辑', '场景'],
+        content: {
+          wordCount: 320,
+          imageCount: 1,
+          references: 2,
+          section: '用户场景'
+        },
+        cluster: 'requirements',
+        position: { x: 10, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'user_stories',
+        order: 1,
+        sentiment: 'positive',
+        keywords: ['实时编辑', '多人协作', '版本同步']
+      },
+      {
+        id: 'story_p2',
+        type: 'paragraph',
+        label: '协作审核流程',
+        category: 'collaboration',
+        x: 90,
+        y: 630,
+        size: 24,
+        color: '#10b981',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 4,
+        lastModified: Date.now() - 345600000,
+        author: '赵六',
+        tags: ['协作', '审核'],
+        content: {
+          wordCount: 380,
+          imageCount: 2,
+          references: 3,
+          section: '功能描述'
+        },
+        cluster: 'requirements',
+        position: { x: 90, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'user_stories',
+        order: 2,
+        sentiment: 'neutral',
+        keywords: ['审核流程', '权限管理', '通知机制']
+      },
+      {
+        id: 'story_p3',
+        type: 'paragraph',
+        label: '移动端适配',
+        category: 'mobile',
+        x: 50,
+        y: 670,
+        size: 20,
+        color: '#10b981',
+        importance: 0.6,
+        centrality: 0.5,
+        connections: 2,
+        lastModified: Date.now() - 345600000,
+        author: '赵六',
+        tags: ['移动端', '适配'],
+        content: {
+          wordCount: 280,
+          imageCount: 1,
+          references: 1,
+          section: '验收标准'
+        },
+        cluster: 'requirements',
+        position: { x: 50, y: 670 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'user_stories',
+        order: 3,
+        sentiment: 'neutral',
+        keywords: ['响应式设计', '触摸操作', '离线功能']
+      },
+      {
+        id: 'ui_design',
+        type: 'document',
+        label: 'UI设计',
+        category: 'design',
+        x: 250,
+        y: 550,
+        size: 38,
+        color: '#ec4899',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 8,
+        lastModified: Date.now() - 432000000,
+        author: '孙七',
+        tags: ['UI', '设计', '界面'],
+        content: {
+          wordCount: 2200,
+          imageCount: 25,
+          references: 15,
+          paragraphs: 8,
+          sections: ['设计原则', '色彩方案', '组件规范', '交互设计']
+        },
+        cluster: 'design',
+        position: { x: 250, y: 550 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['ui_p1', 'ui_p2', 'ui_p3', 'ui_p4'],
+        relatedDocs: ['user_stories', 'technical_design', 'prototype'],
+        similarity: {
+          'user_stories': 0.68,
+          'prototype': 0.82,
+          'technical_design': 0.58
+        },
+        metrics: {
+          readability: 0.9,
+          completeness: 0.85,
+          relevance: 0.77
+        }
+      },
+      // UI设计的段落节点
+      {
+        id: 'ui_p1',
+        type: 'paragraph',
+        label: '设计语言',
+        category: 'design_system',
+        x: 200,
+        y: 630,
+        size: 26,
+        color: '#f472b6',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 4,
+        lastModified: Date.now() - 432000000,
+        author: '孙七',
+        tags: ['设计语言', '规范'],
+        content: {
+          wordCount: 420,
+          imageCount: 6,
+          references: 3,
+          section: '设计原则'
+        },
+        cluster: 'design',
+        position: { x: 200, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'ui_design',
+        order: 1,
+        sentiment: 'positive',
+        keywords: ['简洁明了', '一致性', '可访问性']
+      },
+      {
+        id: 'ui_p2',
+        type: 'paragraph',
+        label: '色彩搭配',
+        category: 'color_scheme',
+        x: 300,
+        y: 630,
+        size: 24,
+        color: '#f472b6',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 432000000,
+        author: '孙七',
+        tags: ['色彩', '搭配'],
+        content: {
+          wordCount: 320,
+          imageCount: 8,
+          references: 2,
+          section: '色彩方案'
+        },
+        cluster: 'design',
+        position: { x: 300, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'ui_design',
+        order: 2,
+        sentiment: 'neutral',
+        keywords: ['主题色', '辅助色', '对比度']
+      },
+      {
+        id: 'ui_p3',
+        type: 'paragraph',
+        label: '组件库设计',
+        category: 'components',
+        x: 220,
+        y: 670,
+        size: 28,
+        color: '#f472b6',
+        importance: 0.85,
+        centrality: 0.75,
+        connections: 5,
+        lastModified: Date.now() - 432000000,
+        author: '孙七',
+        tags: ['组件', '库'],
+        content: {
+          wordCount: 520,
+          imageCount: 12,
+          references: 4,
+          section: '组件规范'
+        },
+        cluster: 'design',
+        position: { x: 220, y: 670 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'ui_design',
+        order: 3,
+        sentiment: 'positive',
+        keywords: ['按钮组件', '表单组件', '导航组件']
+      },
+      {
+        id: 'ui_p4',
+        type: 'paragraph',
+        label: '交互原型',
+        category: 'interaction',
+        x: 280,
+        y: 670,
+        size: 25,
+        color: '#f472b6',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 4,
+        lastModified: Date.now() - 432000000,
+        author: '孙七',
+        tags: ['交互', '原型'],
+        content: {
+          wordCount: 380,
+          imageCount: 10,
+          references: 3,
+          section: '交互设计'
+        },
+        cluster: 'design',
+        position: { x: 280, y: 670 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'ui_design',
+        order: 4,
+        sentiment: 'positive',
+        keywords: ['动画效果', '状态反馈', '操作流程']
+      },
+      {
+        id: 'database_schema',
+        type: 'document',
+        label: '数据库设计',
+        category: 'database',
+        x: 750,
+        y: 550,
+        size: 36,
+        color: '#f59e0b',
+        importance: 0.82,
+        centrality: 0.72,
+        connections: 6,
+        lastModified: Date.now() - 518400000,
+        author: '周八',
+        tags: ['数据库', '设计', '存储'],
+        content: {
+          wordCount: 2600,
+          imageCount: 12,
+          references: 10,
+          paragraphs: 9,
+          sections: ['表结构', '索引设计', '关系模型', '数据迁移']
+        },
+        cluster: 'technical',
+        position: { x: 750, y: 550 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: null,
+        childParagraphs: ['db_p1', 'db_p2', 'db_p3'],
+        relatedDocs: ['technical_design', 'api_documentation'],
+        similarity: {
+          'technical_design': 0.88,
+          'api_documentation': 0.75
+        },
+        metrics: {
+          readability: 0.72,
+          completeness: 0.92,
+          relevance: 0.84
+        }
+      },
+      // 数据库设计的段落节点
+      {
+        id: 'db_p1',
+        type: 'paragraph',
+        label: '用户表设计',
+        category: 'user_table',
+        x: 710,
+        y: 630,
+        size: 24,
+        color: '#fbbf24',
+        importance: 0.75,
+        centrality: 0.65,
+        connections: 4,
+        lastModified: Date.now() - 518400000,
+        author: '周八',
+        tags: ['用户表', '设计'],
+        content: {
+          wordCount: 380,
+          imageCount: 3,
+          references: 2,
+          section: '表结构'
+        },
+        cluster: 'technical',
+        position: { x: 710, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'database_schema',
+        order: 1,
+        sentiment: 'neutral',
+        keywords: ['用户信息', '权限字段', '索引优化']
+      },
+      {
+        id: 'db_p2',
+        type: 'paragraph',
+        label: '文档表结构',
+        category: 'document_table',
+        x: 790,
+        y: 630,
+        size: 26,
+        color: '#fbbf24',
+        importance: 0.8,
+        centrality: 0.7,
+        connections: 5,
+        lastModified: Date.now() - 518400000,
+        author: '周八',
+        tags: ['文档表', '结构'],
+        content: {
+          wordCount: 450,
+          imageCount: 4,
+          references: 3,
+          section: '表结构'
+        },
+        cluster: 'technical',
+        position: { x: 790, y: 630 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'database_schema',
+        order: 2,
+        sentiment: 'neutral',
+        keywords: ['文档内容', '版本控制', '关联关系']
+      },
+      {
+        id: 'db_p3',
+        type: 'paragraph',
+        label: '关系模型',
+        category: 'relationships',
+        x: 750,
+        y: 670,
+        size: 22,
+        color: '#fbbf24',
+        importance: 0.7,
+        centrality: 0.6,
+        connections: 3,
+        lastModified: Date.now() - 518400000,
+        author: '周八',
+        tags: ['关系', '模型'],
+        content: {
+          wordCount: 320,
+          imageCount: 2,
+          references: 2,
+          section: '关系模型'
+        },
+        cluster: 'technical',
+        position: { x: 750, y: 670 },
+        velocity: { x: 0, y: 0 },
+        fixed: false,
+        parentDoc: 'database_schema',
+        order: 3,
+        sentiment: 'neutral',
+        keywords: ['外键约束', '连接查询', '数据一致性']
       },
       {
         id: 'user_interface',
@@ -323,16 +1231,17 @@ const GraphViewerEnhanced = ({ onClose }) => {
     // 创建边关系
     const edges = [
       {
-        id: 'edge_1',
+        id: 'edge_doc_overview_req',
         from: 'project_overview',
         to: 'requirements_analysis',
-        type: 'derives',
+        type: 'reference',
         weight: 0.9,
         color: '#3b82f6',
-        label: '衍生关系',
-        strength: 0.8,
-        bidirectional: false,
-        animated: true
+        label: '需求驱动',
+        strength: 0.85,
+        bidirectional: true,
+        animated: true,
+        category: 'core_relationship'
       },
       {
         id: 'edge_2',
@@ -668,6 +1577,222 @@ const GraphViewerEnhanced = ({ onClose }) => {
     }
   };
 
+  // 画布交互处理函数
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x;
+    const y = (e.clientY - rect.top) * (viewBox.height / rect.height) + viewBox.y;
+
+    // 检查是否点击在节点上
+    const clickedNode = filteredData.nodes.find(node => {
+      const dx = x - node.x;
+      const dy = y - node.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= node.size / 2;
+    });
+
+    if (clickedNode) {
+      // 开始拖拽节点
+      setDragState({
+        isDragging: true,
+        draggedNode: clickedNode,
+        dragOffset: { x: x - clickedNode.x, y: y - clickedNode.y },
+        startPos: { x, y }
+      });
+    } else if (tool === 'pan') {
+      // 开始平移画布
+      setCanvasState(prev => ({
+        ...prev,
+        isPanning: true,
+        panStart: { x: e.clientX, y: e.clientY }
+      }));
+    }
+  }, [tool, filteredData.nodes, viewBox, canvasRef]);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x;
+    const y = (e.clientY - rect.top) * (viewBox.height / rect.height) + viewBox.y;
+
+    if (dragState.isDragging && dragState.draggedNode) {
+      // 拖拽节点
+      const newX = x - dragState.dragOffset.x;
+      const newY = y - dragState.dragOffset.y;
+
+      // 更新节点位置
+      const updatedNodes = filteredData.nodes.map(node => {
+        if (node.id === dragState.draggedNode.id) {
+          return { ...node, x: newX, y: newY, position: { x: newX, y: newY } };
+        }
+        return node;
+      });
+
+      // 使用setState更新节点数据
+      setEnhancedGraphData(prev => ({
+        ...prev,
+        nodes: prev.nodes.map(node => {
+          if (node.id === dragState.draggedNode.id) {
+            return { ...node, x: newX, y: newY, position: { x: newX, y: newY } };
+          }
+          return node;
+        })
+      }));
+
+    } else if (canvasState.isPanning) {
+      // 平移画布
+      const deltaX = (e.clientX - canvasState.panStart.x) * (viewBox.width / rect.width);
+      const deltaY = (e.clientY - canvasState.panStart.y) * (viewBox.height / rect.height);
+
+      setViewBox(prev => ({
+        ...prev,
+        x: prev.x - deltaX,
+        y: prev.y - deltaY
+      }));
+
+      setCanvasState(prev => ({
+        ...prev,
+        panStart: { x: e.clientX, y: e.clientY }
+      }));
+    } else {
+      // 检查悬停
+      const hoveredNode = filteredData.nodes.find(node => {
+        const dx = x - node.x;
+        const dy = y - node.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= node.size / 2;
+      });
+
+      setHoveredNode(hoveredNode || null);
+    }
+  }, [dragState, canvasState, filteredData.nodes, viewBox, canvasRef]);
+
+  const handleMouseUp = useCallback(() => {
+    setDragState({
+      isDragging: false,
+      draggedNode: null,
+      dragOffset: { x: 0, y: 0 },
+      startPos: { x: 0, y: 0 }
+    });
+
+    setCanvasState(prev => ({
+      ...prev,
+      isPanning: false,
+      panStart: { x: 0, y: 0 }
+    }));
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredNode(null);
+    handleMouseUp();
+  }, [handleMouseUp]);
+
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x;
+    const mouseY = (e.clientY - rect.top) * (viewBox.height / rect.height) + viewBox.y;
+
+    const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+    const newScale = Math.max(0.1, Math.min(5, canvasState.transform.scale * zoomFactor));
+    
+    if (newScale !== canvasState.transform.scale) {
+      const scaleChange = newScale / canvasState.transform.scale;
+      
+      setViewBox(prev => ({
+        x: mouseX - (mouseX - prev.x) * scaleChange,
+        y: mouseY - (mouseY - prev.y) * scaleChange,
+        width: prev.width * scaleChange,
+        height: prev.height * scaleChange
+      }));
+
+      setCanvasState(prev => ({
+        ...prev,
+        transform: {
+          ...prev.transform,
+          scale: newScale
+        }
+      }));
+    }
+  }, [viewBox, canvasState.transform.scale, canvasRef]);
+
+  // 画布控制函数
+  const zoomIn = useCallback(() => {
+    const newScale = Math.min(5, canvasState.transform.scale * 1.2);
+    const scaleChange = newScale / canvasState.transform.scale;
+    
+    setViewBox(prev => ({
+      x: prev.x + prev.width * (1 - scaleChange) * 0.5,
+      y: prev.y + prev.height * (1 - scaleChange) * 0.5,
+      width: prev.width * scaleChange,
+      height: prev.height * scaleChange
+    }));
+
+    setCanvasState(prev => ({
+      ...prev,
+      transform: { ...prev.transform, scale: newScale }
+    }));
+  }, [canvasState.transform.scale]);
+
+  const zoomOut = useCallback(() => {
+    const newScale = Math.max(0.1, canvasState.transform.scale * 0.8);
+    const scaleChange = newScale / canvasState.transform.scale;
+    
+    setViewBox(prev => ({
+      x: prev.x + prev.width * (1 - scaleChange) * 0.5,
+      y: prev.y + prev.height * (1 - scaleChange) * 0.5,
+      width: prev.width * scaleChange,
+      height: prev.height * scaleChange
+    }));
+
+    setCanvasState(prev => ({
+      ...prev,
+      transform: { ...prev.transform, scale: newScale }
+    }));
+  }, [canvasState.transform.scale]);
+
+  const zoomToFit = useCallback(() => {
+    if (filteredData.nodes.length === 0) return;
+
+    const padding = 50;
+    const minX = Math.min(...filteredData.nodes.map(n => n.x - n.size)) - padding;
+    const maxX = Math.max(...filteredData.nodes.map(n => n.x + n.size)) + padding;
+    const minY = Math.min(...filteredData.nodes.map(n => n.y - n.size)) - padding;
+    const maxY = Math.max(...filteredData.nodes.map(n => n.y + n.size)) + padding;
+
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+
+    setViewBox({
+      x: minX,
+      y: minY,
+      width: contentWidth,
+      height: contentHeight
+    });
+
+    setCanvasState(prev => ({
+      ...prev,
+      transform: { x: 0, y: 0, scale: 1 }
+    }));
+  }, [filteredData.nodes]);
+
+  const centerView = useCallback(() => {
+    if (filteredData.nodes.length === 0) return;
+
+    const centerX = filteredData.nodes.reduce((sum, n) => sum + n.x, 0) / filteredData.nodes.length;
+    const centerY = filteredData.nodes.reduce((sum, n) => sum + n.y, 0) / filteredData.nodes.length;
+
+    setViewBox(prev => ({
+      x: centerX - prev.width / 2,
+      y: centerY - prev.height / 2,
+      width: prev.width,
+      height: prev.height
+    }));
+  }, [filteredData.nodes]);
+
   // 布局算法
   const applyLayout = (layoutType) => {
     const nodes = [...filteredData.nodes];
@@ -985,6 +2110,96 @@ const GraphViewerEnhanced = ({ onClose }) => {
 
         {/* 控制面板 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          {/* 画布控制 */}
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: '#6b7280', marginRight: '8px' }}>画布:</span>
+            <button
+              onClick={zoomIn}
+              style={{
+                padding: '6px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="放大"
+            >
+              <ZoomIn size={14} />
+            </button>
+            <button
+              onClick={zoomOut}
+              style={{
+                padding: '6px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="缩小"
+            >
+              <ZoomOut size={14} />
+            </button>
+            <button
+              onClick={zoomToFit}
+              style={{
+                padding: '6px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="适应画布"
+            >
+              <Maximize2 size={14} />
+            </button>
+            <button
+              onClick={centerView}
+              style={{
+                padding: '6px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="居中显示"
+            >
+              <Crosshair size={14} />
+            </button>
+            <button
+              onClick={() => setTool(tool === 'select' ? 'pan' : 'select')}
+              style={{
+                padding: '6px',
+                backgroundColor: tool === 'pan' ? '#3b82f6' : '#f3f4f6',
+                color: tool === 'pan' ? 'white' : '#374151',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title={tool === 'pan' ? '切换到选择' : '切换到平移'}
+            >
+              <Move size={14} />
+            </button>
+          </div>
+
           {/* 搜索框 */}
           <div style={{ position: 'relative', flex: '1', minWidth: '200px', maxWidth: '300px' }}>
             <Search 
@@ -1155,6 +2370,11 @@ const GraphViewerEnhanced = ({ onClose }) => {
             height="100%"
             viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
             style={{ cursor: tool === 'pan' ? 'grab' : 'default' }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}
           >
             {/* 定义样式 */}
             <defs>
