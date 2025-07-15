@@ -2315,49 +2315,6 @@ const GraphViewerEnhanced = ({ onClose }) => {
               指标
             </button>
           </div>
-
-          {/* 缩放控制 */}
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <button
-              onClick={() => setZoomLevel(prev => Math.min(prev + 0.1, 3))}
-              style={{
-                padding: '6px',
-                backgroundColor: '#f3f4f6',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <ZoomIn size={14} />
-            </button>
-            <button
-              onClick={() => setZoomLevel(prev => Math.max(prev - 0.1, 0.1))}
-              style={{
-                padding: '6px',
-                backgroundColor: '#f3f4f6',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <ZoomOut size={14} />
-            </button>
-            <button
-              onClick={() => {
-                setZoomLevel(1);
-                setPanOffset({ x: 0, y: 0 });
-              }}
-              style={{
-                padding: '6px',
-                backgroundColor: '#f3f4f6',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              <RotateCcw size={14} />
-            </button>
-          </div>
         </div>
       </div>
 
