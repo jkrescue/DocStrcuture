@@ -59,63 +59,6 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     '重要', '紧急', '待审核', '已完成', '进行中', '已暂停'
   ];
 
-  // 辅助函数定义（需要在 useMemo 之前定义）
-  const getHighlight = (block, query) => {
-    const content = JSON.stringify(block.content).toLowerCase();
-    const queryLower = query.toLowerCase();
-    const index = content.indexOf(queryLower);
-    if (index !== -1) {
-      const start = Math.max(0, index - 20);
-      const end = Math.min(content.length, index + query.length + 20);
-      return content.substring(start, end);
-    }
-    return '';
-  };
-
-  const getBlockTags = (block) => {
-    const tags = [block.type];
-    if (block.content.value) tags.push('有数据');
-    if (block.metadata.locked) tags.push('已锁定');
-    return tags;
-  };
-
-  const getBlockIcon = (type) => {
-    switch (type) {
-      case 'text': return '📄';
-      case 'field': return '📝';
-      case 'table': return '📊';
-      case 'reference': return '🔗';
-      default: return '📄';
-    }
-  };
-
-  // 计算相关性得分
-  const calculateRelevance = (block, query) => {
-    if (!query) return 0;
-    const content = JSON.stringify(block.content).toLowerCase();
-    const queryLower = query.toLowerCase();
-    
-    let score = 0;
-    const queryWords = queryLower.split(/\s+/);
-    
-    queryWords.forEach(word => {
-      const occurrences = (content.match(new RegExp(word, 'g')) || []).length;
-      score += occurrences * 10;
-      
-      if (block.type === 'text' && block.content.text && 
-          block.content.text.toLowerCase().includes(word)) {
-        score += 50;
-      }
-      
-      if (block.type === 'field' && block.content.label && 
-          block.content.label.toLowerCase().includes(word)) {
-        score += 30;
-      }
-    });
-    
-    return score;
-  };
-
   // 智能搜索建议生成
   const generateSuggestions = (query) => {
     if (!query.trim()) return [];
@@ -181,6 +124,33 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     });
   }, [searchQuery, filters, sortBy, blocks, searchBlocks]);
 
+  // 计算相关性得分
+  const calculateRelevance = (block, query) => {
+    if (!query) return 0;
+    const content = JSON.stringify(block.content).toLowerCase();
+    const queryLower = query.toLowerCase();
+    
+    let score = 0;
+    const queryWords = queryLower.split(/\s+/);
+    
+    queryWords.forEach(word => {
+      const occurrences = (content.match(new RegExp(word, 'g')) || []).length;
+      score += occurrences * 10;
+      
+      if (block.type === 'text' && block.content.text && 
+          block.content.text.toLowerCase().includes(word)) {
+        score += 50;
+      }
+      
+      if (block.type === 'field' && block.content.label && 
+          block.content.label.toLowerCase().includes(word)) {
+        score += 30;
+      }
+    });
+    
+    return score;
+  };
+
   useEffect(() => {
     if (searchQuery.trim()) {
       setSearchResults(performAdvancedSearch);
@@ -191,7 +161,6 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     }
   }, [searchQuery, performAdvancedSearch]);
 
-  // 搜索输入变化处理
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery.trim()) {
@@ -204,6 +173,35 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const getHighlight = (block, query) => {
+    const content = JSON.stringify(block.content).toLowerCase();
+    const queryLower = query.toLowerCase();
+    const index = content.indexOf(queryLower);
+    if (index !== -1) {
+      const start = Math.max(0, index - 20);
+      const end = Math.min(content.length, index + query.length + 20);
+      return content.substring(start, end);
+    }
+    return '';
+  };
+
+  const getBlockTags = (block) => {
+    const tags = [block.type];
+    if (block.content.value) tags.push('有数据');
+    if (block.metadata.locked) tags.push('已锁定');
+    return tags;
+  };
+
+  const getBlockIcon = (type) => {
+    switch (type) {
+      case 'text': return '📄';
+      case 'field': return '📝';
+      case 'table': return '📊';
+      case 'reference': return '🔗';
+      default: return '📄';
+    }
+  };
 
   const handleSearch = (query) => {
     setSearchQuery(query);

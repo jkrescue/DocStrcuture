@@ -13,10 +13,11 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     tags: []
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('relevance');
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [sortBy, setSortBy] = useState('relevance'); // relevance, date, type
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const [searchFocus, setSearchFocus] = useState(false);
+  const [quickFilters, setQuickFilters] = useState([]);
   const [savedSearches, setSavedSearches] = useState([
     { id: 1, name: '重要文档', query: '重要|紧急', filters: { tags: ['重要'] } },
     { id: 2, name: '本周更新', query: '', filters: { dateRange: 'week' } },
@@ -24,12 +25,17 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
   ]);
   const searchInputRef = useRef(null);
 
+  // 模拟搜索结果数据
   const [searchHistory, setSearchHistory] = useState([
     { query: '项目需求', timestamp: Date.now() - 86400000, resultCount: 15 },
     { query: '会议纪要', timestamp: Date.now() - 172800000, resultCount: 8 },
     { query: '用户反馈', timestamp: Date.now() - 259200000, resultCount: 23 },
     { query: '技术文档', timestamp: Date.now() - 345600000, resultCount: 42 }
   ]);
+
+  // 智能建议关键词
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const blockTypes = [
     { id: 'all', name: '全部类型' },
@@ -59,63 +65,6 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     '重要', '紧急', '待审核', '已完成', '进行中', '已暂停'
   ];
 
-  // 辅助函数定义（需要在 useMemo 之前定义）
-  const getHighlight = (block, query) => {
-    const content = JSON.stringify(block.content).toLowerCase();
-    const queryLower = query.toLowerCase();
-    const index = content.indexOf(queryLower);
-    if (index !== -1) {
-      const start = Math.max(0, index - 20);
-      const end = Math.min(content.length, index + query.length + 20);
-      return content.substring(start, end);
-    }
-    return '';
-  };
-
-  const getBlockTags = (block) => {
-    const tags = [block.type];
-    if (block.content.value) tags.push('有数据');
-    if (block.metadata.locked) tags.push('已锁定');
-    return tags;
-  };
-
-  const getBlockIcon = (type) => {
-    switch (type) {
-      case 'text': return '📄';
-      case 'field': return '📝';
-      case 'table': return '📊';
-      case 'reference': return '🔗';
-      default: return '📄';
-    }
-  };
-
-  // 计算相关性得分
-  const calculateRelevance = (block, query) => {
-    if (!query) return 0;
-    const content = JSON.stringify(block.content).toLowerCase();
-    const queryLower = query.toLowerCase();
-    
-    let score = 0;
-    const queryWords = queryLower.split(/\s+/);
-    
-    queryWords.forEach(word => {
-      const occurrences = (content.match(new RegExp(word, 'g')) || []).length;
-      score += occurrences * 10;
-      
-      if (block.type === 'text' && block.content.text && 
-          block.content.text.toLowerCase().includes(word)) {
-        score += 50;
-      }
-      
-      if (block.type === 'field' && block.content.label && 
-          block.content.label.toLowerCase().includes(word)) {
-        score += 30;
-      }
-    });
-    
-    return score;
-  };
-
   // 智能搜索建议生成
   const generateSuggestions = (query) => {
     if (!query.trim()) return [];
@@ -141,9 +90,10 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     }
     
     if (filters.author !== 'all') {
+      // 模拟作者过滤
       results = results.filter(block => {
         if (filters.author === 'me') return block.metadata.author === '当前用户';
-        return true;
+        return true; // 其他作者的过滤逻辑
       });
     }
     
@@ -181,6 +131,35 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     });
   }, [searchQuery, filters, sortBy, blocks, searchBlocks]);
 
+  // 计算相关性得分
+  const calculateRelevance = (block, query) => {
+    if (!query) return 0;
+    const content = JSON.stringify(block.content).toLowerCase();
+    const queryLower = query.toLowerCase();
+    
+    let score = 0;
+    const queryWords = queryLower.split(/\s+/);
+    
+    queryWords.forEach(word => {
+      const occurrences = (content.match(new RegExp(word, 'g')) || []).length;
+      score += occurrences * 10;
+      
+      // 标题匹配加权
+      if (block.type === 'text' && block.content.text && 
+          block.content.text.toLowerCase().includes(word)) {
+        score += 50;
+      }
+      
+      // 字段标签匹配加权
+      if (block.type === 'field' && block.content.label && 
+          block.content.label.toLowerCase().includes(word)) {
+        score += 30;
+      }
+    });
+    
+    return score;
+  };
+
   useEffect(() => {
     if (searchQuery.trim()) {
       setSearchResults(performAdvancedSearch);
@@ -205,13 +184,43 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const getHighlight = (block, query) => {
+    const content = JSON.stringify(block.content).toLowerCase();
+    const queryLower = query.toLowerCase();
+    const index = content.indexOf(queryLower);
+    if (index !== -1) {
+      const start = Math.max(0, index - 20);
+      const end = Math.min(content.length, index + query.length + 20);
+      return content.substring(start, end);
+    }
+    return '';
+  };
+
+  const getBlockTags = (block) => {
+    // 根据块类型和内容生成标签
+    const tags = [block.type];
+    if (block.content.value) tags.push('有数据');
+    if (block.metadata.locked) tags.push('已锁定');
+    return tags;
+  };
+
+  const getBlockIcon = (type) => {
+    switch (type) {
+      case 'text': return '📄';
+      case 'field': return '📝';
+      case 'table': return '📊';
+      case 'reference': return '🔗';
+      default: return '📄';
+    }
+  };
+
   const handleSearch = (query) => {
     setSearchQuery(query);
     if (query && !searchHistory.find(item => item.query === query)) {
       const newHistoryItem = {
         query,
         timestamp: Date.now(),
-        resultCount: 0
+        resultCount: 0 // 将在结果更新后计算
       };
       setSearchHistory(prev => [newHistoryItem, ...prev.slice(0, 9)]);
     }
@@ -260,11 +269,13 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
   const copyBlockContent = (block) => {
     const content = JSON.stringify(block.content, null, 2);
     navigator.clipboard.writeText(content);
+    // 这里可以添加成功提示
   };
 
   const shareBlock = (block) => {
     const shareUrl = `${window.location.origin}#block=${block.id}`;
     navigator.clipboard.writeText(shareUrl);
+    // 这里可以添加成功提示
   };
 
   return (
@@ -604,23 +615,23 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
                   标签
                 </label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                  {availableTags.slice(0, 3).map(tag => (
+                  {availableTags.map(tag => (
                     <button
                       key={tag}
                       onClick={() => {
-                        const newTags = filters.tags.includes(tag)
+                        const newTags = filters.tags.includes(tag) 
                           ? filters.tags.filter(t => t !== tag)
                           : [...filters.tags, tag];
                         setFilters(prev => ({ ...prev, tags: newTags }));
                       }}
                       style={{
                         padding: '4px 8px',
-                        fontSize: '12px',
-                        borderRadius: '4px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        backgroundColor: filters.tags.includes(tag) ? '#eff6ff' : '#f3f4f6',
-                        color: filters.tags.includes(tag) ? '#1d4ed8' : '#6b7280'
+                        fontSize: '11px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '12px',
+                        backgroundColor: filters.tags.includes(tag) ? '#3b82f6' : 'white',
+                        color: filters.tags.includes(tag) ? 'white' : '#6b7280',
+                        cursor: 'pointer'
                       }}
                     >
                       {tag}
@@ -872,6 +883,26 @@ const SearchPanel = ({ onClose, onSelectBlock }) => {
                             onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                           >
                             <Share2 size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedResult(block);
+                              setShowPreview(true);
+                            }}
+                            title="预览"
+                            style={{
+                              padding: '4px',
+                              background: 'none',
+                              border: 'none',
+                              color: '#6b7280',
+                              cursor: 'pointer',
+                              borderRadius: '4px'
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                          >
+                            <Eye size={14} />
                           </button>
                         </div>
                       </div>

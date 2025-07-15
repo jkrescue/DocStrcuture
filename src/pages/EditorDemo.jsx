@@ -26,6 +26,7 @@ import {
 import BlockEditor from '../components/BlockEditor/BlockEditor';
 import SearchPanel from '../components/SearchPanel/SearchPanel';
 import TemplateCenter from '../components/TemplateCenter/TemplateCenter';
+import TemplateCenterEnhanced from '../components/TemplateCenter/TemplateCenter_Enhanced';
 import VersionPanel from '../components/VersionPanel/VersionPanel';
 import GraphViewer from '../components/GraphViewer/GraphViewer';
 import { useDocStore } from '../stores/docStore';
@@ -55,6 +56,7 @@ const EditorDemo = () => {
   const [workspaceExpanded, setWorkspaceExpanded] = useState(true);
   const [templatesExpanded, setTemplatesExpanded] = useState(false);
   const [recentExpanded, setRecentExpanded] = useState(true);
+  const [useEnhancedTemplateCenter, setUseEnhancedTemplateCenter] = useState(true);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -149,7 +151,12 @@ const EditorDemo = () => {
       case 'search':
         return <SearchPanel onSelectDocument={setCurrentDocument} />;
       case 'templates':
-        return <TemplateCenter onSelectTemplate={createNewDocument} />;
+        return useEnhancedTemplateCenter ? 
+          <TemplateCenterEnhanced 
+            onClose={() => setActivePanel('editor')}
+            onApplyTemplate={createNewDocument} 
+          /> : 
+          <TemplateCenter onSelectTemplate={createNewDocument} />;
       case 'versions':
         return <VersionPanel document={currentDocument} />;
       case 'graph':
@@ -544,6 +551,28 @@ const EditorDemo = () => {
           <div style={{ flex: 1 }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {activePanel === 'templates' && (
+              <button
+                onClick={() => setUseEnhancedTemplateCenter(!useEnhancedTemplateCenter)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  background: useEnhancedTemplateCenter ? '#3b82f6' : 'white',
+                  color: useEnhancedTemplateCenter ? 'white' : '#6b7280',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                <Sparkles size={14} />
+                {useEnhancedTemplateCenter ? '增强版' : '基础版'}
+              </button>
+            )}
+            
             <button
               style={{
                 display: 'flex',
