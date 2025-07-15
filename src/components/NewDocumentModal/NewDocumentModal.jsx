@@ -4,9 +4,11 @@ import {
   Star, Eye, Copy, ArrowRight, Sparkles, Zap, BookOpen,
   ChevronRight, Tag, User, Calendar, TrendingUp, Award,
   Save, Edit3, Settings, Palette, Type, Table, Link2,
-  Image, Code, List, CheckSquare, Quote, Hash
+  Image, Code, List, CheckSquare, Quote, Hash, Upload,
+  FileUp, Scan, Brain, Network
 } from 'lucide-react';
 import { useDocStore } from '../../stores/docStore';
+import DocumentParser from '../DocumentParser/DocumentParser';
 
 const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
   const { templates } = useDocStore();
@@ -14,6 +16,11 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [documentType, setDocumentType] = useState('blank'); // 添加文档类型状态
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [parseProgress, setParseProgress] = useState(0);
+  const [parsedContent, setParsedContent] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [documentConfig, setDocumentConfig] = useState({
     title: '',
     description: '',
@@ -29,22 +36,35 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
     {
       id: 'blank',
       title: '空白文档',
-      description: '从头开始创建，完全自由的文档结构',
+      description: '使用专业的Notion风格编辑器，支持丰富的内容块',
       icon: FileText,
       color: '#3b82f6',
       gradient: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
-      features: ['自由编辑', '灵活布局', '无限创作'],
-      recommended: false
+      features: ['Notion风格编辑', '丰富内容块', '拖拽排序', '斜杠命令'],
+      recommended: true,
+      editorType: 'blocknote'
     },
     {
       id: 'structured',
-      title: '结构化文档',
-      description: '基于预定义结构，确保内容组织清晰',
+      title: '传统编辑器',
+      description: '基于块级结构的传统编辑器，适合熟悉现有界面的用户',
       icon: Layout,
       color: '#10b981',
       gradient: 'linear-gradient(135deg, #10b981 0%, #047857 100%)',
-      features: ['标准化结构', '引导式创建', '专业格式'],
-      recommended: true
+      features: ['块级编辑', '传统界面', '稳定可靠', '快速响应'],
+      recommended: false,
+      editorType: 'traditional'
+    },
+    {
+      id: 'upload_parse',
+      title: '文档解析',
+      description: '上传PDF等文件，智能解析为结构化文档并建立关联关系',
+      icon: Brain,
+      color: '#8b5cf6',
+      gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+      features: ['PDF解析', '智能识别', '结构化转换', '关系建立'],
+      recommended: true,
+      editorType: 'parser'
     },
     {
       id: 'template',
@@ -191,7 +211,11 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleCreateDocument = () => {
+  const handleCreateDocument = (typeId = null) => {
+    const targetTypeId = typeId || documentType;
+    const selectedDocType = documentTypes.find(type => type.id === targetTypeId);
+    const editorType = selectedDocType?.editorType || 'traditional';
+    
     let newDoc = {
       id: `doc_${Date.now()}`,
       title: documentConfig.title || '无标题文档',
@@ -205,7 +229,8 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
         description: documentConfig.description,
         isPublic: documentConfig.isPublic,
         collaborators: documentConfig.collaborators,
-        status: 'draft'
+        status: 'draft',
+        editorType: editorType
       },
       blocks: []
     };
@@ -223,6 +248,7 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
     // 重置状态
     setStep('choice');
     setSelectedTemplate(null);
+    setDocumentType('blank');
     setDocumentConfig({
       title: '',
       description: '',
@@ -267,10 +293,14 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
               if (type.id === 'template') {
                 setStep('template');
               } else if (type.id === 'structured') {
+                setDocumentType('structured');
                 setStep('customize');
                 setDocumentConfig(prev => ({ ...prev, structure: 'structured' }));
+              } else if (type.id === 'upload_parse') {
+                setDocumentType('upload_parse');
+                setStep('parse');
               } else {
-                handleCreateDocument();
+                handleCreateDocument(type.id);
               }
             }}
             style={{
@@ -796,6 +826,33 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
     </div>
   );
 
+  // 文档解析步骤渲染
+  const renderParseStep = () => (
+    <DocumentParser
+      onParseComplete={(document) => {
+        onCreateDocument(document);
+        onClose();
+        // 重置状态
+        setStep('choice');
+        setSelectedTemplate(null);
+        setDocumentType('blank');
+        setUploadedFile(null);
+        setParsedContent(null);
+        setIsProcessing(false);
+        setDocumentConfig({
+          title: '',
+          description: '',
+          category: '',
+          tags: [],
+          isPublic: false,
+          collaborators: [],
+          structure: 'free'
+        });
+      }}
+      onCancel={() => setStep('choice')}
+    />
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -885,6 +942,7 @@ const NewDocumentModal = ({ isOpen, onClose, onCreateDocument }) => {
           {step === 'choice' && renderChoiceStep()}
           {step === 'template' && renderTemplateStep()}
           {step === 'customize' && renderCustomizeStep()}
+          {step === 'parse' && renderParseStep()}
         </div>
 
         {/* 底部操作栏 */}

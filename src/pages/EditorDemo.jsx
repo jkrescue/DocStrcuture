@@ -31,6 +31,7 @@ import VersionPanel from '../components/VersionPanel/VersionPanel';
 import VersionPanelEnhanced from '../components/VersionPanel/VersionPanel_Enhanced';
 import GraphViewer from '../components/GraphViewer/GraphViewer';
 import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
+import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -62,6 +63,7 @@ const EditorDemo = () => {
   const [useEnhancedVersionPanel, setUseEnhancedVersionPanel] = useState(true);
   const [useEnhancedBlockEditor, setUseEnhancedBlockEditor] = useState(true);
   const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
+  const [showRelationshipManager, setShowRelationshipManager] = useState(false);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -227,6 +229,24 @@ const EditorDemo = () => {
                       协作模式
                     </button>
                     <button
+                      onClick={() => setShowRelationshipManager(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '6px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '6px',
+                        background: 'white',
+                        color: '#6b7280',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Network size={14} />
+                      关系管理
+                    </button>
+                    <button
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -272,6 +292,7 @@ const EditorDemo = () => {
                     onBlocksChange={handleBlocksChange}
                     editable={true}
                     enhanced={useEnhancedBlockEditor}
+                    document={currentDocument}
                   />
                 </div>
               ) : (
@@ -570,26 +591,56 @@ const EditorDemo = () => {
           <div style={{ flex: 1 }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {activePanel === 'editor' && (
-              <button
-                onClick={() => setUseEnhancedBlockEditor(!useEnhancedBlockEditor)}
-                style={{
+            {activePanel === 'editor' && currentDocument && (
+              <>
+                {/* 显示当前编辑器类型 */}
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
                   padding: '6px 12px',
-                  border: '1px solid #d1d5db',
+                  backgroundColor: currentDocument.metadata?.editorType === 'blocknote' ? '#eff6ff' : '#f3f4f6',
+                  color: currentDocument.metadata?.editorType === 'blocknote' ? '#3b82f6' : '#6b7280',
                   borderRadius: '6px',
-                  background: useEnhancedBlockEditor ? '#3b82f6' : 'white',
-                  color: useEnhancedBlockEditor ? 'white' : '#6b7280',
                   fontSize: '12px',
-                  cursor: 'pointer',
                   fontWeight: '500'
-                }}
-              >
-                <Sparkles size={14} />
-                {useEnhancedBlockEditor ? '增强编辑器' : '基础编辑器'}
-              </button>
+                }}>
+                  {currentDocument.metadata?.editorType === 'blocknote' ? (
+                    <>
+                      <Sparkles size={14} />
+                      Notion风格编辑器
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      {useEnhancedBlockEditor ? '增强编辑器' : '基础编辑器'}
+                    </>
+                  )}
+                </div>
+                
+                {/* 传统编辑器才显示切换按钮 */}
+                {currentDocument.metadata?.editorType !== 'blocknote' && (
+                  <button
+                    onClick={() => setUseEnhancedBlockEditor(!useEnhancedBlockEditor)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '6px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      background: useEnhancedBlockEditor ? '#3b82f6' : 'white',
+                      color: useEnhancedBlockEditor ? 'white' : '#6b7280',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <Sparkles size={14} />
+                    切换版本
+                  </button>
+                )}
+              </>
             )}
 
             {activePanel === 'templates' && (
@@ -694,6 +745,14 @@ const EditorDemo = () => {
         onClose={() => setShowNewDocumentModal(false)}
         onCreateDocument={handleCreateDocument}
       />
+
+      {/* 关系管理器 */}
+      {showRelationshipManager && currentDocument && (
+        <RelationshipManager
+          documentId={currentDocument.id}
+          onClose={() => setShowRelationshipManager(false)}
+        />
+      )}
     </div>
   );
 };

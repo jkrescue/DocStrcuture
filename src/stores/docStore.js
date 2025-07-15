@@ -5,6 +5,15 @@ const useDocStore = create((set, get) => ({
   documents: [],
   currentDocument: null,
   
+  // 应用状态
+  searchQuery: '',
+  selectedBlocks: [],
+  isCollaborativeMode: false,
+  
+  // 文档关系数据
+  documentRelationships: [],
+  blockRelationships: [],
+  
   // 块数据
   blocks: [
     {
@@ -326,6 +335,155 @@ const useDocStore = create((set, get) => ({
   // Actions
   updateBlocks: (newBlocks) => set({ blocks: newBlocks }),
   
+  // 文档管理方法
+  addDocument: (document) => set((state) => ({
+    documents: [...state.documents, document]
+  })),
+  
+  setCurrentDocument: (document) => set({ currentDocument: document }),
+  
+  updateCurrentDocument: (updates) => set((state) => ({
+    currentDocument: state.currentDocument ? { ...state.currentDocument, ...updates } : null,
+    documents: state.documents.map(doc => 
+      doc.id === state.currentDocument?.id ? { ...doc, ...updates } : doc
+    )
+  })),
+  
+  removeDocument: (documentId) => set((state) => ({
+    documents: state.documents.filter(doc => doc.id !== documentId),
+    currentDocument: state.currentDocument?.id === documentId ? null : state.currentDocument
+  })),
+  
+  // 应用状态管理
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  
+  setSelectedBlocks: (blocks) => set({ selectedBlocks: blocks }),
+  
+  setCollaborativeMode: (enabled) => set({ isCollaborativeMode: enabled }),
+  
+  // 块与文档关联的方法
+  addBlockToDocument: (documentId, block) => set((state) => ({
+    documents: state.documents.map(doc =>
+      doc.id === documentId 
+        ? { ...doc, blocks: [...(doc.blocks || []), block] }
+        : doc
+    ),
+    currentDocument: state.currentDocument?.id === documentId
+      ? { ...state.currentDocument, blocks: [...(state.currentDocument.blocks || []), block] }
+      : state.currentDocument
+  })),
+  
+  updateBlockInDocument: (documentId, blockId, updates) => set((state) => ({
+    documents: state.documents.map(doc =>
+      doc.id === documentId 
+        ? { 
+            ...doc, 
+            blocks: (doc.blocks || []).map(block => 
+              block.id === blockId ? { ...block, ...updates } : block
+            )
+          }
+        : doc
+    ),
+    currentDocument: state.currentDocument?.id === documentId
+      ? { 
+          ...state.currentDocument, 
+          blocks: (state.currentDocument.blocks || []).map(block => 
+            block.id === blockId ? { ...block, ...updates } : block
+          )
+        }
+      : state.currentDocument
+  })),
+  
+  deleteBlockFromDocument: (documentId, blockId) => set((state) => ({
+    documents: state.documents.map(doc =>
+      doc.id === documentId 
+        ? { ...doc, blocks: (doc.blocks || []).filter(block => block.id !== blockId) }
+        : doc
+    ),
+    currentDocument: state.currentDocument?.id === documentId
+      ? { ...state.currentDocument, blocks: (state.currentDocument.blocks || []).filter(block => block.id !== blockId) }
+      : state.currentDocument
+  })),
+  
+  // 关系管理方法
+  addDocumentRelationship: (sourceDocId, targetDocId, relationType, description = '') => set((state) => ({
+    documentRelationships: [...state.documentRelationships, {
+      id: `doc_rel_${Date.now()}`,
+      sourceDocId,
+      targetDocId,
+      type: relationType,
+      description,
+      createdAt: new Date().toISOString(),
+      strength: 1.0
+    }]
+  })),
+  
+  addBlockRelationship: (sourceBlockId, targetBlockId, relationType, description = '') => set((state) => ({
+    blockRelationships: [...state.blockRelationships, {
+      id: `block_rel_${Date.now()}`,
+      sourceBlockId,
+      targetBlockId,
+      type: relationType,
+      description,
+      createdAt: new Date().toISOString(),
+      strength: 1.0
+    }]
+  })),
+  
+  removeDocumentRelationship: (relationshipId) => set((state) => ({
+    documentRelationships: state.documentRelationships.filter(rel => rel.id !== relationshipId)
+  })),
+  
+  removeBlockRelationship: (relationshipId) => set((state) => ({
+    blockRelationships: state.blockRelationships.filter(rel => rel.id !== relationshipId)
+  })),
+  
+  getDocumentRelationships: (documentId) => {
+    const state = get();
+    return state.documentRelationships.filter(rel => 
+      rel.sourceDocId === documentId || rel.targetDocId === documentId
+    );
+  },
+  
+  getBlockRelationships: (blockId) => {
+    const state = get();
+    return state.blockRelationships.filter(rel => 
+      rel.sourceBlockId === blockId || rel.targetBlockId === blockId
+    );
+  },
+  
+  // 智能关系推荐
+  suggestRelationships: (documentId) => {
+    const state = get();
+    const currentDoc = state.documents.find(doc => doc.id === documentId);
+    if (!currentDoc) return [];
+    
+    const suggestions = [];
+    
+    // 基于内容相似性推荐
+    state.documents.forEach(doc => {
+      if (doc.id !== documentId) {
+        // 简单的关键词匹配逻辑
+        const currentKeywords = extractKeywords(currentDoc);
+        const targetKeywords = extractKeywords(doc);
+        const similarity = calculateSimilarity(currentKeywords, targetKeywords);
+        
+        if (similarity > 0.3) {
+          suggestions.push({
+            targetDocId: doc.id,
+            targetDocTitle: doc.title,
+            suggestedType: similarity > 0.7 ? 'derives' : 'relates',
+            confidence: similarity,
+            reason: `内容相似度: ${Math.round(similarity * 100)}%`
+          });
+        }
+      }
+    });
+    
+    return suggestions.sort((a, b) => b.confidence - a.confidence).slice(0, 5);
+  },
+  
+  // 现有的块管理方法
   addBlock: (block) => set((state) => ({
     blocks: [...state.blocks, {
       ...block,
@@ -437,6 +595,34 @@ const useDocStore = create((set, get) => ({
     );
   }
 }));
+
+// 辅助函数
+const extractKeywords = (document) => {
+  const text = JSON.stringify(document.blocks || document.content || '')
+    .toLowerCase()
+    .replace(/[^\w\s\u4e00-\u9fff]/g, ' ');
+  
+  // 简单的关键词提取（实际项目中可使用更复杂的NLP技术）
+  const words = text.split(/\s+/).filter(word => word.length > 2);
+  const frequency = {};
+  words.forEach(word => {
+    frequency[word] = (frequency[word] || 0) + 1;
+  });
+  
+  return Object.entries(frequency)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([word]) => word);
+};
+
+const calculateSimilarity = (keywords1, keywords2) => {
+  const set1 = new Set(keywords1);
+  const set2 = new Set(keywords2);
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+  
+  return union.size > 0 ? intersection.size / union.size : 0;
+};
 
 export { useDocStore };
 export default useDocStore;
