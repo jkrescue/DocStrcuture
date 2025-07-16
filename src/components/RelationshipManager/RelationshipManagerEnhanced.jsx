@@ -19,7 +19,7 @@ import {
   Zap,
   X
 } from 'lucide-react';
-import { useDocStore } from '../../stores/docStore';
+import useDocStore from '../../stores/docStore';
 import './RelationshipManagerEnhanced.css';
 
 const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
@@ -30,7 +30,8 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
     removeDocumentRelationship,
     blockRelationships,
     addBlockRelationship,
-    removeBlockRelationship
+    removeBlockRelationship,
+    getBlockRelationships
   } = useDocStore();
 
   // 基础状态
@@ -40,6 +41,12 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
   const [relationType, setRelationType] = useState('relates');
   const [description, setDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // 块关系相关状态
+  const [selectedSourceBlock, setSelectedSourceBlock] = useState(null);
+  const [selectedTargetBlock, setSelectedTargetBlock] = useState(null);
+  const [selectedTargetDocument, setSelectedTargetDocument] = useState(null);
+  const [blockSearchQuery, setBlockSearchQuery] = useState('');
   
   // 增强交互状态
   const [relationshipFilter, setRelationshipFilter] = useState('all');
@@ -100,6 +107,45 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
   const currentRelationships = documentRelationships.filter(rel => 
     rel.sourceDocId === documentId || rel.targetDocId === documentId
   );
+  
+  // 辅助函数：在所有文档中查找块
+  const findBlockInAllDocuments = (blockId) => {
+    for (const doc of documents) {
+      const block = doc.blocks?.find(b => b.id === blockId);
+      if (block) {
+        return { ...block, documentId: doc.id, documentTitle: doc.title };
+      }
+    }
+    return null;
+  };
+  
+  // 当前文档的块和块关系
+  const currentDocumentBlocks = currentDocument?.blocks || [];
+  const currentBlockRelationships = blockRelationships.filter(rel => {
+    // 获取源块和目标块的文档ID
+    const sourceBlock = findBlockInAllDocuments(rel.sourceBlockId);
+    const targetBlock = findBlockInAllDocuments(rel.targetBlockId);
+    
+    return (sourceBlock?.documentId === documentId || targetBlock?.documentId === documentId);
+  });
+  
+  // 获取其他文档的块
+  const getBlocksFromOtherDocuments = () => {
+    return documents
+      .filter(doc => doc.id !== documentId)
+      .flatMap(doc => 
+        (doc.blocks || []).map(block => ({
+          ...block,
+          documentId: doc.id,
+          documentTitle: doc.title
+        }))
+      )
+      .filter(block => 
+        blockSearchQuery === '' || 
+        block.content?.text?.toLowerCase().includes(blockSearchQuery.toLowerCase()) ||
+        block.content?.label?.toLowerCase().includes(blockSearchQuery.toLowerCase())
+      );
+  };
 
   // 智能建议（模拟）
   const [suggestions, setSuggestions] = useState([]);
@@ -137,18 +183,37 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
 
   // 关系统计
   const relationshipStats = useMemo(() => {
-    const stats = relationshipTypes.reduce((acc, type) => {
+    const docStats = relationshipTypes.reduce((acc, type) => {
       acc[type.id] = currentRelationships.filter(rel => rel.type === type.id).length;
       return acc;
     }, {});
     
+    const blockStats = relationshipTypes.reduce((acc, type) => {
+      acc[type.id] = currentBlockRelationships.filter(rel => rel.type === type.id).length;
+      return acc;
+    }, {});
+    
     return {
-      total: currentRelationships.length,
-      types: stats,
-      incoming: currentRelationships.filter(rel => rel.targetDocId === documentId).length,
-      outgoing: currentRelationships.filter(rel => rel.sourceDocId === documentId).length
+      documents: {
+        total: currentRelationships.length,
+        types: docStats,
+        incoming: currentRelationships.filter(rel => rel.targetDocId === documentId).length,
+        outgoing: currentRelationships.filter(rel => rel.sourceDocId === documentId).length
+      },
+      blocks: {
+        total: currentBlockRelationships.length,
+        types: blockStats,
+        incoming: currentBlockRelationships.filter(rel => {
+          const targetBlock = findBlockInAllDocuments(rel.targetBlockId);
+          return targetBlock?.documentId === documentId;
+        }).length,
+        outgoing: currentBlockRelationships.filter(rel => {
+          const sourceBlock = findBlockInAllDocuments(rel.sourceBlockId);
+          return sourceBlock?.documentId === documentId;
+        }).length
+      }
     };
-  }, [currentRelationships, documentId]);
+  }, [currentRelationships, currentBlockRelationships, documentId]);
 
   // 创建关系
   const handleCreateRelationship = () => {
@@ -165,6 +230,37 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
         setSelectedTarget(null);
       }
     }
+  };
+
+  // 创建块关系
+  const handleCreateBlockRelationship = () => {
+    if (selectedSourceBlock && selectedTargetBlock && relationType) {
+      addBlockRelationship(selectedSourceBlock, selectedTargetBlock, relationType, description);
+      
+      // 重置表单
+      setSelectedSourceBlock(null);
+      setSelectedTargetBlock(null);
+      setSelectedTargetDocument(null);
+      setDescription('');
+    }
+  };
+
+  // 获取块的显示文本
+  const getBlockDisplayText = (block) => {
+    if (!block) return '';
+    
+    if (block.type === 'text' && block.content?.text) {
+      const text = block.content.text.replace(/[#*\n]/g, ' ').trim();
+      return text.length > 80 ? text.substring(0, 80) + '...' : text;
+    } else if (block.type === 'field' && block.content?.label) {
+      return `${block.content.label}: ${block.content.value || ''}`;
+    } else if (block.type === 'table' && block.content?.title) {
+      return `表格: ${block.content.title}`;
+    } else if (block.type === 'reference' && block.content?.title) {
+      return `引用: ${block.content.title}`;
+    }
+    
+    return `${block.type} 块`;
   };
 
   // 批量删除关系
@@ -216,8 +312,18 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
             <Network size={24} />
           </div>
           <div className="stat-content">
-            <div className="stat-number">{relationshipStats.total}</div>
-            <div className="stat-label">总关系数</div>
+            <div className="stat-number">{relationshipStats.documents.total}</div>
+            <div className="stat-label">文档关系</div>
+          </div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-icon">
+            <GitBranch size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{relationshipStats.blocks.total}</div>
+            <div className="stat-label">段落关系</div>
           </div>
         </div>
         
@@ -226,7 +332,7 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
             <TrendingUp size={24} />
           </div>
           <div className="stat-content">
-            <div className="stat-number">{relationshipStats.incoming}</div>
+            <div className="stat-number">{relationshipStats.documents.incoming + relationshipStats.blocks.incoming}</div>
             <div className="stat-label">传入关系</div>
           </div>
         </div>
@@ -236,18 +342,8 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
             <ArrowRight size={24} />
           </div>
           <div className="stat-content">
-            <div className="stat-number">{relationshipStats.outgoing}</div>
+            <div className="stat-number">{relationshipStats.documents.outgoing + relationshipStats.blocks.outgoing}</div>
             <div className="stat-label">传出关系</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon">
-            <Brain size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-number">{suggestions.length}</div>
-            <div className="stat-label">智能推荐</div>
           </div>
         </div>
       </div>
@@ -257,15 +353,21 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
         <h4>关系类型分布</h4>
         <div className="type-stats">
           {relationshipTypes.map(type => {
-            const count = relationshipStats.types[type.id] || 0;
-            const percentage = relationshipStats.total > 0 ? (count / relationshipStats.total) * 100 : 0;
+            const docCount = relationshipStats.documents.types[type.id] || 0;
+            const blockCount = relationshipStats.blocks.types[type.id] || 0;
+            const totalCount = docCount + blockCount;
+            const totalRelationships = relationshipStats.documents.total + relationshipStats.blocks.total;
+            const percentage = totalRelationships > 0 ? (totalCount / totalRelationships) * 100 : 0;
             
             return (
               <div key={type.id} className="type-stat-item">
                 <div className="type-info">
                   <type.icon size={16} color={type.color} />
                   <span className="type-name">{type.label}</span>
-                  <span className="type-count">({count})</span>
+                  <span className="type-count">
+                    ({totalCount}) 
+                    <span className="type-breakdown">文档:{docCount} 段落:{blockCount}</span>
+                  </span>
                 </div>
                 <div className="type-bar">
                   <div 
@@ -288,10 +390,18 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
         <div className="action-buttons">
           <button 
             className="action-btn primary"
-            onClick={() => setActiveTab('create')}
+            onClick={() => setActiveTab('documents')}
           >
             <Plus size={16} />
-            创建关系
+            创建文档关系
+          </button>
+          
+          <button 
+            className="action-btn primary"
+            onClick={() => setActiveTab('blocks')}
+          >
+            <GitBranch size={16} />
+            创建段落关系
           </button>
           
           <button 
@@ -315,13 +425,13 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
     </div>
   );
 
-  // 渲染创建关系面板
-  const renderCreateRelationship = () => (
+  // 渲染文档关系面板
+  const renderDocumentRelationships = () => (
     <div className="create-panel">
       <div className="panel-header">
         <h3>
-          <Plus size={20} />
-          创建新关系
+          <Network size={20} />
+          文档关系管理
         </h3>
         
         <div className="mode-toggle">
@@ -441,150 +551,316 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
           )}
         </div>
       </div>
+
+      {/* 现有文档关系列表 */}
+      <div style={{ marginTop: '32px' }}>
+        <h4 style={{ 
+          fontSize: '16px', 
+          fontWeight: '600', 
+          marginBottom: '16px',
+          color: '#111827'
+        }}>
+          已建立的文档关系 ({currentRelationships.length})
+        </h4>
+
+        {currentRelationships.length === 0 ? (
+          <div className="empty-state">
+            <Network size={48} />
+            <h4>暂无文档关系</h4>
+            <p>开始创建文档之间的关联关系</p>
+          </div>
+        ) : (
+          <div className="relationships-list">
+            {currentRelationships.map(relationship => {
+              const sourceDoc = documents.find(d => d.id === relationship.sourceDocId);
+              const targetDoc = documents.find(d => d.id === relationship.targetDocId);
+              const type = relationshipTypes.find(t => t.id === relationship.type);
+              
+              return (
+                <div key={relationship.id} className="relationship-item">
+                  <div className="relationship-content">
+                    <div className="relationship-flow">
+                      <div className="doc-node">
+                        <span className="doc-title">{sourceDoc?.title}</span>
+                        {relationship.sourceDocId === documentId && (
+                          <span className="current-badge">当前</span>
+                        )}
+                      </div>
+                      
+                      <div className="relationship-arrow">
+                        <type.icon size={16} color={type.color} />
+                        <ArrowRight size={14} />
+                      </div>
+                      
+                      <div className="doc-node">
+                        <span className="doc-title">{targetDoc?.title}</span>
+                        {relationship.targetDocId === documentId && (
+                          <span className="current-badge">当前</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="relationship-meta">
+                      <span className="type-badge" style={{ backgroundColor: type.color }}>
+                        {type.label}
+                      </span>
+                      
+                      {relationship.description && (
+                        <span className="description">{relationship.description}</span>
+                      )}
+                      
+                      <span className="timestamp">
+                        {new Date(relationship.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() => removeDocumentRelationship(relationship.id)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 
-  // 渲染关系列表
-  const renderRelationshipsList = () => (
-    <div className="relationships-panel">
+  // 渲染块关系面板
+  const renderBlockRelationships = () => (
+    <div className="create-panel">
       <div className="panel-header">
         <h3>
-          <Network size={20} />
-          关系列表 ({filteredRelationships.length})
+          <GitBranch size={20} />
+          段落关系管理
         </h3>
         
-        <div className="list-controls">
-          <div className="filter-group">
-            <select
-              value={relationshipFilter}
-              onChange={(e) => setRelationshipFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">所有类型</option>
-              {relationshipTypes.map(type => (
-                <option key={type.id} value={type.id}>{type.label}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="view-controls">
-            <button 
-              className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              列表
-            </button>
-            <button 
-              className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              网格
-            </button>
-          </div>
+        <div className="help-text">
+          在当前文档的段落与其他文档段落之间建立关系
         </div>
       </div>
 
-      {selectedRelationships.length > 0 && (
-        <div className="batch-actions">
-          <span className="selected-count">
-            已选择 {selectedRelationships.length} 个关系
-          </span>
-          <button 
-            className="batch-delete-btn"
-            onClick={handleBatchDelete}
+      <div className="create-form">
+        <div className="form-grid">
+          <div className="form-group">
+            <label>源段落（当前文档）</label>
+            <select
+              value={selectedSourceBlock || ''}
+              onChange={(e) => setSelectedSourceBlock(e.target.value)}
+            >
+              <option value="">选择源段落</option>
+              {currentDocumentBlocks.map(block => (
+                <option key={block.id} value={block.id}>
+                  {getBlockDisplayText(block)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>目标文档</label>
+            <select
+              value={selectedTargetDocument || ''}
+              onChange={(e) => {
+                setSelectedTargetDocument(e.target.value);
+                setSelectedTargetBlock(null); // 重置目标块选择
+              }}
+            >
+              <option value="">选择目标文档</option>
+              {filteredDocuments.map(doc => (
+                <option key={doc.id} value={doc.id}>{doc.title}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>目标段落</label>
+            <select
+              value={selectedTargetBlock || ''}
+              onChange={(e) => setSelectedTargetBlock(e.target.value)}
+              disabled={!selectedTargetDocument}
+            >
+              <option value="">选择目标段落</option>
+              {selectedTargetDocument && 
+                documents.find(doc => doc.id === selectedTargetDocument)?.blocks?.map(block => (
+                  <option key={block.id} value={block.id}>
+                    {getBlockDisplayText(block)}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>关系类型</label>
+            <div className="relationship-types">
+              {relationshipTypes.map(type => (
+                <button
+                  key={type.id}
+                  className={`type-btn ${relationType === type.id ? 'active' : ''}`}
+                  onClick={() => setRelationType(type.id)}
+                  style={{ borderColor: type.color }}
+                >
+                  <type.icon size={16} color={relationType === type.id ? 'white' : type.color} />
+                  <span>{type.label}</span>
+                </button>
+              ))}
+            </div>
+            {relationType && (
+              <div className="type-description">
+                {relationshipTypes.find(t => t.id === relationType)?.description}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 搜索过滤 */}
+        <div className="form-group full-width">
+          <label>搜索段落内容</label>
+          <input
+            type="text"
+            placeholder="搜索段落内容..."
+            value={blockSearchQuery}
+            onChange={(e) => setBlockSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        <div className="form-group full-width">
+          <label>关系描述 (可选)</label>
+          <textarea
+            placeholder="描述段落之间的关系..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            className="create-btn"
+            onClick={handleCreateBlockRelationship}
+            disabled={!selectedSourceBlock || !selectedTargetBlock}
           >
-            <Trash2 size={16} />
-            批量删除
+            <Plus size={16} />
+            创建段落关系
           </button>
+        </div>
+      </div>
+
+      {/* 段落预览区域 */}
+      {(selectedSourceBlock || selectedTargetBlock) && (
+        <div className="block-preview-section">
+          <h4>段落预览</h4>
+          <div className="block-previews">
+            {selectedSourceBlock && (
+              <div className="block-preview">
+                <h5>源段落</h5>
+                <div className="block-content">
+                  {getBlockDisplayText(currentDocumentBlocks.find(b => b.id === selectedSourceBlock))}
+                </div>
+                <div className="block-meta">
+                  来自: {currentDocument?.title}
+                </div>
+              </div>
+            )}
+            
+            {selectedTargetBlock && selectedTargetDocument && (
+              <div className="block-preview">
+                <h5>目标段落</h5>
+                <div className="block-content">
+                  {getBlockDisplayText(
+                    documents.find(doc => doc.id === selectedTargetDocument)?.blocks?.find(b => b.id === selectedTargetBlock)
+                  )}
+                </div>
+                <div className="block-meta">
+                  来自: {documents.find(doc => doc.id === selectedTargetDocument)?.title}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <div className={`relationships-list ${viewMode}`}>
-        {filteredRelationships.length === 0 ? (
+      {/* 现有块关系列表 */}
+      <div style={{ marginTop: '32px' }}>
+        <h4 style={{ 
+          fontSize: '16px', 
+          fontWeight: '600', 
+          marginBottom: '16px',
+          color: '#111827'
+        }}>
+          已建立的段落关系 ({currentBlockRelationships.length})
+        </h4>
+
+        {currentBlockRelationships.length === 0 ? (
           <div className="empty-state">
-            <Network size={48} />
-            <h4>暂无关系</h4>
-            <p>开始创建文档之间的关联关系</p>
-            <button 
-              className="create-first-btn"
-              onClick={() => setActiveTab('create')}
-            >
-              <Plus size={16} />
-              创建第一个关系
-            </button>
+            <GitBranch size={48} />
+            <h4>暂无段落关系</h4>
+            <p>开始创建段落之间的关联关系</p>
           </div>
         ) : (
-          filteredRelationships.map(relationship => {
-            const sourceDoc = documents.find(d => d.id === relationship.sourceDocId);
-            const targetDoc = documents.find(d => d.id === relationship.targetDocId);
-            const type = relationshipTypes.find(t => t.id === relationship.type);
-            const isSelected = selectedRelationships.includes(relationship.id);
-            
-            return (
-              <div
-                key={relationship.id}
-                className={`relationship-item ${isSelected ? 'selected' : ''}`}
-              >
-                <div className="relationship-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedRelationships(prev => [...prev, relationship.id]);
-                      } else {
-                        setSelectedRelationships(prev => prev.filter(id => id !== relationship.id));
-                      }
-                    }}
-                  />
-                </div>
-                
-                <div className="relationship-content">
-                  <div className="relationship-flow">
-                    <div className="doc-node">
-                      <span className="doc-title">{sourceDoc?.title}</span>
-                      {relationship.sourceDocId === documentId && (
-                        <span className="current-badge">当前</span>
-                      )}
+          <div className="relationships-list">
+            {currentBlockRelationships.map(relationship => {
+              const sourceBlock = findBlockInAllDocuments(relationship.sourceBlockId);
+              const targetBlock = findBlockInAllDocuments(relationship.targetBlockId);
+              const type = relationshipTypes.find(t => t.id === relationship.type);
+              
+              return (
+                <div key={relationship.id} className="relationship-item block-relationship">
+                  <div className="relationship-content">
+                    <div className="relationship-flow">
+                      <div className="block-node">
+                        <div className="block-text">{getBlockDisplayText(sourceBlock)}</div>
+                        <div className="block-doc">{sourceBlock?.documentTitle}</div>
+                        {sourceBlock?.documentId === documentId && (
+                          <span className="current-badge">当前</span>
+                        )}
+                      </div>
+                      
+                      <div className="relationship-arrow">
+                        <type.icon size={16} color={type.color} />
+                        <ArrowRight size={14} />
+                      </div>
+                      
+                      <div className="block-node">
+                        <div className="block-text">{getBlockDisplayText(targetBlock)}</div>
+                        <div className="block-doc">{targetBlock?.documentTitle}</div>
+                        {targetBlock?.documentId === documentId && (
+                          <span className="current-badge">当前</span>
+                        )}
+                      </div>
                     </div>
                     
-                    <div className="relationship-arrow">
-                      <type.icon size={16} color={type.color} />
-                      <ArrowRight size={14} />
-                    </div>
-                    
-                    <div className="doc-node">
-                      <span className="doc-title">{targetDoc?.title}</span>
-                      {relationship.targetDocId === documentId && (
-                        <span className="current-badge">当前</span>
+                    <div className="relationship-meta">
+                      <span className="type-badge" style={{ backgroundColor: type.color }}>
+                        {type.label}
+                      </span>
+                      
+                      {relationship.description && (
+                        <span className="description">{relationship.description}</span>
                       )}
+                      
+                      <span className="timestamp">
+                        {new Date(relationship.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
-                  
-                  <div className="relationship-meta">
-                    <span className="type-badge" style={{ backgroundColor: type.color }}>
-                      {type.label}
-                    </span>
-                    
-                    {relationship.description && (
-                      <span className="description">{relationship.description}</span>
-                    )}
-                    
-                    <span className="timestamp">
-                      {new Date(relationship.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
 
-                <button
-                  className="delete-btn"
-                  onClick={() => removeDocumentRelationship(relationship.id)}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            );
-          })
+                  <button
+                    className="delete-btn"
+                    onClick={() => removeBlockRelationship(relationship.id)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
@@ -688,8 +964,8 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
         <div className="manager-tabs">
           {[
             { id: 'overview', label: '概览', icon: TrendingUp },
-            { id: 'create', label: '创建关系', icon: Plus },
-            { id: 'list', label: '关系列表', icon: Network },
+            { id: 'documents', label: '文档关系', icon: Network },
+            { id: 'blocks', label: '段落关系', icon: GitBranch },
             { id: 'suggestions', label: '智能推荐', icon: Brain }
           ].map(tab => (
             <button
@@ -706,8 +982,8 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
         {/* 内容区域 */}
         <div className="manager-content">
           {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'create' && renderCreateRelationship()}
-          {activeTab === 'list' && renderRelationshipsList()}
+          {activeTab === 'documents' && renderDocumentRelationships()}
+          {activeTab === 'blocks' && renderBlockRelationships()}
           {activeTab === 'suggestions' && renderSuggestions()}
         </div>
       </div>

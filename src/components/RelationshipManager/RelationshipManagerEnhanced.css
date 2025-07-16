@@ -949,3 +949,119 @@
     transform: rotate(90deg);
   }
 }
+
+/* 块关系相关样式 */
+.help-text {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.type-breakdown {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+/* 段落预览 */
+.block-preview-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.block-preview-section h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #111827;
+}
+
+.block-previews {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.block-preview {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.block-preview h5 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.block-content {
+  font-size: 13px;
+  color: #111827;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.block-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 块关系项 */
+.relationship-item.block-relationship {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.block-node {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 200px;
+}
+
+.block-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-doc {
+  font-size: 11px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .block-previews {
+    grid-template-columns: 1fr;
+  }
+  
+  .block-node {
+    max-width: 150px;
+  }
+  
+  .type-breakdown {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+}

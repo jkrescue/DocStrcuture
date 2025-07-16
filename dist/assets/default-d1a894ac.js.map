@@ -1,0 +1,1 @@
+{"version":3,"file":"default-d1a894ac.js","sources":["../../node_modules/devlop/lib/default.js"],"sourcesContent":["export function deprecate(fn) {\n  return fn\n}\n\nexport function equal() {}\n\nexport function ok() {}\n\nexport function unreachable() {}\n"],"names":["ok"],"mappings":"AAMO,SAASA,GAAK,CAAA","x_google_ignoreList":[0]}
