@@ -17,7 +17,11 @@ import {
   Link,
   GitBranch,
   Zap,
-  X
+  X,
+  CheckCircle,
+  Play,
+  Shield,
+  Settings
 } from 'lucide-react';
 import useDocStore from '../../stores/docStore';
 import './RelationshipManagerEnhanced.css';
@@ -99,6 +103,55 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
       color: '#6b7280', 
       icon: RefreshCw,
       description: '替代其他文档'
+    },
+    { 
+      id: 'depends_on', 
+      label: '依赖', 
+      color: '#06b6d4', 
+      icon: ArrowRight,
+      description: '依赖其他文档的内容'
+    },
+    { 
+      id: 'influences', 
+      label: '影响', 
+      color: '#84cc16', 
+      icon: TrendingUp,
+      description: '影响其他文档的方向'
+    },
+    { 
+      id: 'defines', 
+      label: '定义', 
+      color: '#a855f7', 
+      icon: Settings,
+      description: '定义了其他文档的规范'
+    },
+    { 
+      id: 'validates', 
+      label: '验证', 
+      color: '#22c55e', 
+      icon: CheckCircle,
+      description: '验证其他文档的可行性'
+    },
+    { 
+      id: 'initiates', 
+      label: '启动', 
+      color: '#f97316', 
+      icon: Play,
+      description: '启动或开始其他文档的工作'
+    },
+    { 
+      id: 'complements', 
+      label: '补充', 
+      color: '#14b8a6', 
+      icon: Plus,
+      description: '补充其他文档的内容'
+    },
+    { 
+      id: 'tested_by', 
+      label: '被测试', 
+      color: '#ec4899', 
+      icon: Shield,
+      description: '被其他文档测试验证'
     }
   ];
 
@@ -610,7 +663,7 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
                       )}
                       
                       <span className="timestamp">
-                        {new Date(relationship.createdAt).toLocaleDateString()}
+                        {relationship.createdAt ? new Date(relationship.createdAt).toLocaleDateString() : '未知日期'}
                       </span>
                     </div>
                   </div>
@@ -846,7 +899,7 @@ const RelationshipManagerEnhanced = ({ isOpen, onClose, documentId }) => {
                       )}
                       
                       <span className="timestamp">
-                        {new Date(relationship.createdAt).toLocaleDateString()}
+                        {relationship.createdAt ? new Date(relationship.createdAt).toLocaleDateString() : '未知日期'}
                       </span>
                     </div>
                   </div>
