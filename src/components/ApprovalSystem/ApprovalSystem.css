@@ -1,0 +1,816 @@
+/* 审批系统样式 */
+
+/* 审批步骤 */
+.approval-step {
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  position: relative;
+}
+
+.approval-step:not(:last-child) .step-line {
+  position: absolute;
+  left: 10px;
+  top: 40px;
+  bottom: -20px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.approval-step.active .step-line {
+  background: #4ECDC4;
+}
+
+.approval-step.completed .step-line {
+  background: #10b981;
+}
+
+.step-indicator {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-icon {
+  border-radius: 50%;
+  padding: 2px;
+  background: white;
+}
+
+.status-icon.pending {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.status-icon.approved {
+  color: #10b981;
+  background: #d1fae5;
+}
+
+.status-icon.rejected {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.status-icon.cancelled {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.step-content {
+  flex: 1;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.approval-step.active .step-content {
+  border-color: #4ECDC4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.assignee-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assignee-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4ECDC4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: white;
+  font-weight: 600;
+}
+
+.assignee-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignee-name {
+  font-weight: 600;
+  color: #111827;
+  font-size: 16px;
+}
+
+.assignee-role {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.step-status {
+  text-align: right;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.cancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.completion-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.step-description h4 {
+  margin: 0 0 8px 0;
+  color: #111827;
+  font-size: 16px;
+}
+
+.step-description p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.step-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #4ECDC4;
+}
+
+.step-comment span {
+  font-size: 14px;
+  color: #374151;
+}
+
+.step-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.show-actions-btn {
+  padding: 8px 16px;
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.show-actions-btn:hover {
+  background: #45b7b8;
+}
+
+.approval-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.approve-btn:hover {
+  background: #059669;
+}
+
+.reject-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.reject-btn:hover {
+  background: #dc2626;
+}
+
+.cancel-btn {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.comment-form {
+  margin: 8px 0;
+}
+
+.comment-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #4ECDC4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+/* 审批工作流 */
+.approval-workflow {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.workflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.workflow-info h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.workflow-description {
+  margin: 0 0 12px 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.workflow-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.creator-info,
+.creation-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.workflow-status {
+  text-align: right;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.status-indicator.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-indicator.approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-indicator.rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-indicator.cancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.progress-info {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.workflow-progress {
+  margin-bottom: 24px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ECDC4, #45b7b8);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.workflow-steps {
+  margin-bottom: 24px;
+}
+
+.workflow-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancel-workflow-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-workflow-btn:hover {
+  background: #dc2626;
+}
+
+.restart-workflow-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.restart-workflow-btn:hover {
+  background: #45b7b8;
+}
+
+/* 审批历史 */
+.approval-history {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.approval-history h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px 0;
+  color: #111827;
+  font-size: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.approval-history.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.approval-history.empty svg {
+  margin-bottom: 16px;
+  color: #d1d5db;
+}
+
+.approval-history.empty h3 {
+  border: none;
+  padding: 0;
+  justify-content: center;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.history-item:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.approval-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.approval-date {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.history-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.approver-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* 发起审批对话框 */
+.approval-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.approval-dialog {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.dialog-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.approval-form {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #4ECDC4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+.workflow-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-option:hover {
+  border-color: #d1d5db;
+}
+
+.radio-option input[type="radio"]:checked + span {
+  color: #4ECDC4;
+  font-weight: 600;
+}
+
+.radio-option input[type="radio"]:checked ~ * {
+  border-color: #4ECDC4;
+}
+
+.radio-option input[type="radio"] {
+  margin-right: 8px;
+}
+
+.radio-option small {
+  color: #6b7280;
+  font-size: 12px;
+  margin-left: 20px;
+}
+
+.approver-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.approver-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.approver-option:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.approver-option.selected {
+  border-color: #4ECDC4;
+  background: #f0fdfc;
+}
+
+.approver-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4ECDC4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+  font-weight: 600;
+}
+
+.approver-info {
+  flex: 1;
+}
+
+.approver-name {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.approver-role {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.selected-icon {
+  color: #4ECDC4;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.dialog-actions .cancel-btn {
+  padding: 8px 16px;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.dialog-actions .cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #45b7b8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .approval-dialog {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .workflow-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .workflow-status {
+    text-align: left;
+  }
+  
+  .step-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .workflow-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .workflow-actions {
+    flex-direction: column;
+  }
+  
+  .history-status {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+}

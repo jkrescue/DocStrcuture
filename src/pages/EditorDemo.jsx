@@ -21,7 +21,8 @@ import {
   Hash,
   Clock,
   Save,
-  Zap
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 import BlockEditor from '../components/BlockEditor/BlockEditor';
 import DocumentManager from '../components/DocumentManager/DocumentManager';
@@ -34,6 +35,7 @@ import GraphViewer from '../components/GraphViewer/GraphViewer';
 import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
 import RelationshipManagerEnhanced from '../components/RelationshipManager/RelationshipManagerEnhanced';
+import SimpleCollaborationPanel from '../components/CollaborationPanel/SimpleCollaborationPanel';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -67,6 +69,7 @@ const EditorDemo = () => {
   const [useEnhancedBlockEditor, setUseEnhancedBlockEditor] = useState(true);
   const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
   const [showRelationshipManager, setShowRelationshipManager] = useState(false);
+  const [showCollaborationPanel, setShowCollaborationPanel] = useState(false);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -579,171 +582,302 @@ const EditorDemo = () => {
       {/* 主内容区 */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* 顶部工具栏 */}
-        <div style={{ 
-          height: '56px',
-          backgroundColor: 'white',
-          borderBottom: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 20px',
-          gap: '12px'
-        }}>
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            style={{
-              padding: '8px',
-              border: 'none',
-              background: 'transparent',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              color: '#6b7280'
-            }}
-          >
-            <FolderOpen size={18} />
-          </button>
+        <div className="toolbar-responsive">
+          {/* 左侧区域 */}
+          <div className="toolbar-section" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="toolbar-button"
+              style={{
+                padding: '10px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                color: '#6b7280',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              <FolderOpen size={20} />
+            </button>
+
+            {/* 当前文档标题 */}
+            {currentDocument && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 0'
+              }}>
+                <FileText size={16} color="#6b7280" />
+                <span className="toolbar-title" style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#111827',
+                  maxWidth: '200px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {currentDocument.title}
+                </span>
+              </div>
+            )}
+          </div>
 
           <div style={{ flex: 1 }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* 右侧工具区域 */}
+          <div className="toolbar-section" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            padding: '4px 0'
+          }}>
             {activePanel === 'editor' && currentDocument && (
-              <>
-                {/* 显示当前编辑器类型 */}
-                <div style={{
+              <div className="toolbar-section toolbar-divider" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px',
+                borderLeft: '1px solid #e5e7eb',
+                paddingLeft: '16px'
+              }}>
+                {/* 编辑器状态标识 */}
+                <div className="toolbar-button" style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
-                  backgroundColor: currentDocument.metadata?.editorType === 'blocknote' ? '#eff6ff' : '#f3f4f6',
-                  color: currentDocument.metadata?.editorType === 'blocknote' ? '#3b82f6' : '#6b7280',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '500'
+                  gap: '6px',
+                  padding: '8px 12px',
+                  backgroundColor: currentDocument.metadata?.editorType === 'blocknote' ? '#dbeafe' : '#f8fafc',
+                  color: currentDocument.metadata?.editorType === 'blocknote' ? '#1e40af' : '#475569',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  border: '1px solid',
+                  borderColor: currentDocument.metadata?.editorType === 'blocknote' ? '#bfdbfe' : '#e2e8f0'
                 }}>
-                  {currentDocument.metadata?.editorType === 'blocknote' ? (
-                    <>
-                      <Sparkles size={14} />
-                      Notion风格编辑器
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={14} />
-                      {useEnhancedBlockEditor ? '增强编辑器' : '基础编辑器'}
-                    </>
-                  )}
+                  <Sparkles size={14} />
+                  <span>{currentDocument.metadata?.editorType === 'blocknote' ? 'Notion编辑器' : '块编辑器'}</span>
                 </div>
                 
                 {/* 传统编辑器才显示切换按钮 */}
                 {currentDocument.metadata?.editorType !== 'blocknote' && (
                   <button
                     onClick={() => setUseEnhancedBlockEditor(!useEnhancedBlockEditor)}
+                    className="toolbar-button"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
-                      padding: '6px 12px',
+                      gap: '6px',
+                      padding: '8px 14px',
                       border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      background: useEnhancedBlockEditor ? '#3b82f6' : 'white',
+                      borderRadius: '8px',
+                      background: useEnhancedBlockEditor ? '#4f46e5' : 'white',
                       color: useEnhancedBlockEditor ? 'white' : '#6b7280',
-                      fontSize: '12px',
+                      fontSize: '13px',
                       cursor: 'pointer',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      transition: 'all 0.2s ease'
                     }}
                   >
-                    <Sparkles size={14} />
-                    切换版本
+                    <Edit3 size={14} />
+                    <span>{useEnhancedBlockEditor ? '增强版' : '切换增强'}</span>
                   </button>
                 )}
-              </>
+              </div>
             )}
 
             {activePanel === 'templates' && (
-              <button
-                onClick={() => setUseEnhancedTemplateCenter(!useEnhancedTemplateCenter)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: useEnhancedTemplateCenter ? '#3b82f6' : 'white',
-                  color: useEnhancedTemplateCenter ? 'white' : '#6b7280',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-              >
-                <Sparkles size={14} />
-                {useEnhancedTemplateCenter ? '增强版' : '基础版'}
-              </button>
+              <div className="toolbar-section toolbar-divider" style={{ 
+                borderLeft: '1px solid #e5e7eb',
+                paddingLeft: '16px'
+              }}>
+                <button
+                  onClick={() => setUseEnhancedTemplateCenter(!useEnhancedTemplateCenter)}
+                  className="toolbar-button"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    background: useEnhancedTemplateCenter ? '#059669' : 'white',
+                    color: useEnhancedTemplateCenter ? 'white' : '#6b7280',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <Layout size={14} />
+                  <span>{useEnhancedTemplateCenter ? '增强模式' : '切换增强'}</span>
+                </button>
+              </div>
             )}
 
             {activePanel === 'versions' && (
+              <div className="toolbar-section toolbar-divider" style={{ 
+                borderLeft: '1px solid #e5e7eb',
+                paddingLeft: '16px'
+              }}>
+                <button
+                  onClick={() => setUseEnhancedVersionPanel(!useEnhancedVersionPanel)}
+                  className="toolbar-button"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    background: useEnhancedVersionPanel ? '#dc2626' : 'white',
+                    color: useEnhancedVersionPanel ? 'white' : '#6b7280',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <History size={14} />
+                  <span>{useEnhancedVersionPanel ? '增强模式' : '切换增强'}</span>
+                </button>
+              </div>
+            )}
+            {/* 操作按钮组 */}
+            <div className="toolbar-section toolbar-divider" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '10px',
+              borderLeft: '1px solid #e5e7eb',
+              paddingLeft: '16px'
+            }}>
               <button
-                onClick={() => setUseEnhancedVersionPanel(!useEnhancedVersionPanel)}
+                className="toolbar-button"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
+                  gap: '6px',
+                  padding: '8px 14px',
                   border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  background: useEnhancedVersionPanel ? '#3b82f6' : 'white',
-                  color: useEnhancedVersionPanel ? 'white' : '#6b7280',
-                  fontSize: '12px',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: '#6b7280',
+                  fontSize: '13px',
                   cursor: 'pointer',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f8fafc';
+                  e.target.style.borderColor = '#94a3b8';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.borderColor = '#d1d5db';
                 }}
               >
-                <Zap size={14} />
-                {useEnhancedVersionPanel ? '增强版' : '基础版'}
+                <Save size={14} />
+                <span>保存</span>
               </button>
-            )}
-            
-            <button
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#6b7280',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              <Save size={14} />
-              保存
-            </button>
 
-            <button
-              style={{
-                padding: '8px',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                color: '#6b7280'
-              }}
-            >
-              <Bell size={16} />
-            </button>
-            
-            <button
-              style={{
-                padding: '8px',
-                border: 'none',
-                background: 'transparent',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                color: '#6b7280'
-              }}
-            >
-              <Settings size={16} />
-            </button>
+              {activePanel === 'editor' && currentDocument && (
+                <button
+                  onClick={() => setShowCollaborationPanel(true)}
+                  className="toolbar-collaboration-btn"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)',
+                    color: 'white',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    position: 'relative',
+                    boxShadow: '0 2px 8px rgba(78, 205, 196, 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(78, 205, 196, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(78, 205, 196, 0.3)';
+                  }}
+                >
+                  <MessageSquare size={16} />
+                  <span>协作</span>
+                  {/* 通知徽章 */}
+                  <span className="notification-badge" style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    background: '#ef4444',
+                    color: 'white',
+                    borderRadius: '12px',
+                    padding: '2px 6px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    minWidth: '20px',
+                    textAlign: 'center',
+                    border: '2px solid white',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    3
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* 用户操作区域 */}
+            <div className="toolbar-section toolbar-divider" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              borderLeft: '1px solid #e5e7eb',
+              paddingLeft: '16px'
+            }}>
+              <button
+                className="toolbar-button"
+                style={{
+                  padding: '10px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+              >
+                <Bell size={18} />
+              </button>
+              
+              <button
+                className="toolbar-button"
+                style={{
+                  padding: '10px',
+                  border: 'none',
+                  background: 'transparent',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+              >
+                <Settings size={18} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -766,6 +900,23 @@ const EditorDemo = () => {
           isOpen={showRelationshipManager}
           documentId={currentDocument.id}
           onClose={() => setShowRelationshipManager(false)}
+        />
+      )}
+
+      {/* 协作面板 */}
+      {showCollaborationPanel && currentDocument && (
+        <SimpleCollaborationPanel
+          documentId={currentDocument.id}
+          documentTitle={currentDocument.title}
+          currentUser={{
+            id: 'current_user',
+            name: 'current_user',
+            avatar: '👤',
+            department: '技术部',
+            role: 'developer'
+          }}
+          isOpen={showCollaborationPanel}
+          onClose={() => setShowCollaborationPanel(false)}
         />
       )}
     </div>

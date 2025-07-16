@@ -5,58 +5,29 @@ import VersionComparisonDemo from './pages/VersionComparisonDemo';
 import './styles/App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('editor'); // 'editor', 'comparison-test', 'comparison-demo'
+  const [currentPage, setCurrentPage] = useState('editor'); // 'editor', 'comparison-demo'
 
   try {
     return (
       <div className="App">
         {/* 页面切换按钮 */}
-        <div style={{
-          position: 'fixed',
-          top: '10px',
-          right: '10px',
-          zIndex: 1000,
-          display: 'flex',
-          gap: '8px'
-        }}>
+        <div className="page-switcher">
           <button
             onClick={() => setCurrentPage('editor')}
+            className="page-switcher-button"
             style={{
-              padding: '8px 16px',
-              backgroundColor: currentPage === 'editor' ? '#007bff' : 'white',
-              color: currentPage === 'editor' ? 'white' : '#333',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '12px'
+              backgroundColor: currentPage === 'editor' ? '#4f46e5' : 'white',
+              color: currentPage === 'editor' ? 'white' : '#374151'
             }}
           >
             主应用
           </button>
           <button
-            onClick={() => setCurrentPage('comparison-test')}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: currentPage === 'comparison-test' ? '#007bff' : 'white',
-              color: currentPage === 'comparison-test' ? 'white' : '#333',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '12px'
-            }}
-          >
-            版本对比测试
-          </button>
-          <button
             onClick={() => setCurrentPage('comparison-demo')}
+            className="page-switcher-button"
             style={{
-              padding: '8px 16px',
-              backgroundColor: currentPage === 'comparison-demo' ? '#007bff' : 'white',
-              color: currentPage === 'comparison-demo' ? 'white' : '#333',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '12px'
+              backgroundColor: currentPage === 'comparison-demo' ? '#059669' : 'white',
+              color: currentPage === 'comparison-demo' ? 'white' : '#374151'
             }}
           >
             版本对比演示
@@ -64,9 +35,7 @@ function App() {
         </div>
 
         {/* 页面内容 */}
-        {currentPage === 'editor' ? <EditorDemo /> : 
-         currentPage === 'comparison-test' ? <VersionComparisonTest /> :
-         <VersionComparisonDemo />}
+        {currentPage === 'editor' ? <EditorDemo /> : <VersionComparisonDemo />}
       </div>
     );
   } catch (error) {
