@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 
 const useDocStore = create((set, get) => ({
-  // 文档数据
+  // 文档和文件夹数据
   documents: [
     {
       id: 'doc_1',
       title: '产品需求文档 - 文档管理系统',
       description: '详细描述文档管理系统的产品需求和功能规格',
+      folderId: null, // 根目录
       blocks: [
         {
           id: 'block_doc1_1',
@@ -38,6 +39,7 @@ const useDocStore = create((set, get) => ({
       id: 'doc_2',
       title: '技术架构设计方案',
       description: '系统技术架构的详细设计文档',
+      folderId: 'folder_1', // 在技术文档文件夹中
       blocks: [
         {
           id: 'block_doc2_1',
@@ -59,6 +61,7 @@ const useDocStore = create((set, get) => ({
       id: 'doc_3',
       title: '周例会纪要 - 第42周',
       description: '第42周团队例会的会议纪要和行动项',
+      folderId: 'folder_2', // 在会议记录文件夹中
       blocks: [
         {
           id: 'block_doc3_1',
@@ -80,6 +83,8 @@ const useDocStore = create((set, get) => ({
       id: 'doc_4',
       title: '用户研究报告',
       description: '针对文档管理需求的用户调研分析报告',
+      folderId: null, // 根目录
+      folderId: null, // 根目录
       blocks: [
         {
           id: 'block_doc4_1',
@@ -100,6 +105,7 @@ const useDocStore = create((set, get) => ({
       id: 'doc_5',
       title: '开发进度周报',
       description: '本周开发团队的工作进展和下周计划',
+      folderId: 'folder_2', // 在会议记录文件夹中
       blocks: [
         {
           id: 'block_doc5_1',
@@ -118,7 +124,46 @@ const useDocStore = create((set, get) => ({
       }
     }
   ],
+  
+  // 文件夹数据
+  folders: [
+    {
+      id: 'folder_1',
+      name: '技术文档',
+      parentId: null, // 根文件夹
+      color: '#3b82f6',
+      metadata: {
+        createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        author: '技术负责人'
+      }
+    },
+    {
+      id: 'folder_2',
+      name: '会议记录',
+      parentId: null, // 根文件夹
+      color: '#10b981',
+      metadata: {
+        createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        author: '项目经理'
+      }
+    },
+    {
+      id: 'folder_3',
+      name: '前端开发',
+      parentId: 'folder_1', // 技术文档的子文件夹
+      color: '#f59e0b',
+      metadata: {
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        author: '前端团队'
+      }
+    }
+  ],
+  
   currentDocument: null,
+  currentFolderId: null, // 当前所在的文件夹ID，null表示根目录
   
   // 应用状态
   searchQuery: '',
@@ -708,6 +753,126 @@ const useDocStore = create((set, get) => ({
     return get().blocks.filter(block => 
       block.type === 'reference' && block.content?.sourceBlockId === blockId
     );
+  },
+
+  // 文件夹管理方法
+  setCurrentFolder: (folderId) => set({ currentFolderId: folderId }),
+
+  addFolder: (folder) => set((state) => ({
+    folders: [...state.folders, {
+      ...folder,
+      id: folder.id || `folder_${Date.now()}`,
+      metadata: {
+        ...folder.metadata,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    }]
+  })),
+
+  updateFolder: (folderId, updates) => set((state) => ({
+    folders: state.folders.map(folder =>
+      folder.id === folderId 
+        ? { 
+            ...folder, 
+            ...updates,
+            metadata: {
+              ...folder.metadata,
+              ...updates.metadata,
+              updatedAt: new Date().toISOString()
+            }
+          }
+        : folder
+    )
+  })),
+
+  removeFolder: (folderId) => set((state) => {
+    // 移除文件夹时，将其中的文档移动到父文件夹或根目录
+    const folderToRemove = state.folders.find(f => f.id === folderId);
+    const newParentId = folderToRemove?.parentId || null;
+    
+    return {
+      folders: state.folders.filter(folder => folder.id !== folderId),
+      documents: state.documents.map(doc =>
+        doc.folderId === folderId
+          ? { ...doc, folderId: newParentId }
+          : doc
+      ),
+      currentFolderId: state.currentFolderId === folderId ? newParentId : state.currentFolderId
+    };
+  }),
+
+  // 文档移动方法
+  moveDocuments: (documentIds, targetFolderId) => set((state) => ({
+    documents: state.documents.map(doc =>
+      documentIds.includes(doc.id)
+        ? { ...doc, folderId: targetFolderId }
+        : doc
+    )
+  })),
+
+  moveDocumentToFolder: (documentId, folderId) => set((state) => ({
+    documents: state.documents.map(doc =>
+      doc.id === documentId
+        ? { ...doc, folderId: folderId }
+        : doc
+    )
+  })),
+
+  // 批量操作方法
+  removeMultipleDocuments: (documentIds) => set((state) => ({
+    documents: state.documents.filter(doc => !documentIds.includes(doc.id)),
+    currentDocument: documentIds.includes(state.currentDocument?.id) 
+      ? null 
+      : state.currentDocument
+  })),
+
+  duplicateDocument: (documentId) => set((state) => {
+    const originalDoc = state.documents.find(doc => doc.id === documentId);
+    if (!originalDoc) return state;
+
+    const duplicatedDoc = {
+      ...originalDoc,
+      id: `doc_${Date.now()}`,
+      title: `${originalDoc.title} - 副本`,
+      blocks: originalDoc.blocks ? originalDoc.blocks.map((block, index) => ({
+        ...block,
+        id: `block_${Date.now()}_${index}`
+      })) : [],
+      metadata: {
+        ...originalDoc.metadata,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    };
+
+    return {
+      documents: [...state.documents, duplicatedDoc]
+    };
+  }),
+
+  // 获取文件夹内容的辅助方法
+  getDocumentsInFolder: (folderId) => {
+    return get().documents.filter(doc => doc.folderId === folderId);
+  },
+
+  getSubfolders: (parentId) => {
+    return get().folders.filter(folder => folder.parentId === parentId);
+  },
+
+  getFolderPath: (folderId) => {
+    const folders = get().folders;
+    const path = [];
+    let currentId = folderId;
+    
+    while (currentId) {
+      const folder = folders.find(f => f.id === currentId);
+      if (!folder) break;
+      path.unshift(folder);
+      currentId = folder.parentId;
+    }
+    
+    return path;
   }
 }));
 
