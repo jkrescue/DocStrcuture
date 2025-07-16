@@ -3,13 +3,23 @@ import {
   GripVertical, Plus, Type, Table, Hash, CheckSquare, Quote, 
   Code, Image, Link2, List, Calendar, Users, Tag, Palette,
   AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
-  MoreHorizontal, Eye, EyeOff, Copy, Trash2, Move, Settings
+  MoreHorizontal, Eye, EyeOff, Copy, Trash2, Move, Settings,
+  Upload, ChevronDown, Clock
 } from 'lucide-react';
 import BlockToolbar from './BlockToolbar';
 import TextBlock from './TextBlock';
 import FieldBlock from './FieldBlock';
 import TableBlock from './TableBlock';
 import ReferenceBlock from './ReferenceBlock';
+import { 
+  DateTimeBlock, 
+  SelectBlock, 
+  NumberBlock, 
+  PersonSelectorBlock, 
+  FileUploadBlock, 
+  ColorPickerBlock 
+} from './AdvancedFormBlocks';
+import './AdvancedFormBlocks.css';
 
 // 新增内容块组件
 const HeadingBlock = ({ block, onChange, editable }) => {
@@ -331,6 +341,13 @@ const SimpleBlockEditorEnhanced = ({ blocks = [], onBlocksChange, editable = tru
     quote: QuoteBlock,
     code: CodeBlock,
     divider: DividerBlock,
+    // 高级表单控件
+    datetime: DateTimeBlock,
+    select: SelectBlock,
+    number: NumberBlock,
+    person: PersonSelectorBlock,
+    fileupload: FileUploadBlock,
+    colorpicker: ColorPickerBlock,
   };
 
   // 块类型定义
@@ -343,6 +360,13 @@ const SimpleBlockEditorEnhanced = ({ blocks = [], onBlocksChange, editable = tru
     { type: 'divider', label: '分割线', icon: MoreHorizontal, description: '内容分隔符' },
     { type: 'field', label: '字段', icon: Tag, description: '表单字段' },
     { type: 'table', label: '表格', icon: Table, description: '数据表格' },
+    // 高级表单控件
+    { type: 'datetime', label: '日期时间', icon: Calendar, description: '日期时间选择器' },
+    { type: 'select', label: '下拉选择', icon: ChevronDown, description: '单选或多选下拉菜单' },
+    { type: 'number', label: '数字输入', icon: Hash, description: '数值输入控件' },
+    { type: 'person', label: '人员选择', icon: Users, description: '人员选择器' },
+    { type: 'fileupload', label: '文件上传', icon: Upload, description: '文件上传控件' },
+    { type: 'colorpicker', label: '颜色选择', icon: Palette, description: '颜色选择器' },
   ];
 
   // 添加新块
@@ -384,6 +408,19 @@ const SimpleBlockEditorEnhanced = ({ blocks = [], onBlocksChange, editable = tru
         return { code: '// 输入代码...', language: 'javascript' };
       case 'divider':
         return { style: 'solid' };
+      // 高级表单控件默认内容
+      case 'datetime':
+        return { label: '日期时间', value: '', required: false, showTime: true };
+      case 'select':
+        return { label: '下拉选择', value: '', options: ['选项1', '选项2', '选项3'], multiple: false, required: false };
+      case 'number':
+        return { label: '数字输入', value: 0, min: null, max: null, step: 1, unit: '', required: false };
+      case 'person':
+        return { label: '人员选择', value: [], multiple: true, required: false };
+      case 'fileupload':
+        return { label: '文件上传', files: [], maxFiles: 5, acceptedTypes: '.pdf,.doc,.docx,.png,.jpg,.jpeg', required: false };
+      case 'colorpicker':
+        return { label: '颜色选择', value: '#4ECDC4', required: false };
       default:
         return {};
     }
