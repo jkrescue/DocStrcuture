@@ -33,6 +33,7 @@ import VersionPanelEnhanced from '../components/VersionPanel/VersionPanel_Enhanc
 import GraphViewer from '../components/GraphViewer/GraphViewer';
 import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
+import RelationshipManagerEnhanced from '../components/RelationshipManager/RelationshipManagerEnhanced';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -761,7 +762,8 @@ const EditorDemo = () => {
 
       {/* 关系管理器 */}
       {showRelationshipManager && currentDocument && (
-        <RelationshipManager
+        <RelationshipManagerEnhanced
+          isOpen={showRelationshipManager}
           documentId={currentDocument.id}
           onClose={() => setShowRelationshipManager(false)}
         />
