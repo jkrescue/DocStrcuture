@@ -24,7 +24,6 @@ import {
   Zap
 } from 'lucide-react';
 import BlockEditor from '../components/BlockEditor/BlockEditor';
-import DocumentManager from '../components/DocumentManager/DocumentManager';
 import SearchPanel from '../components/SearchPanel/SearchPanel';
 import TemplateCenter from '../components/TemplateCenter/TemplateCenter';
 import TemplateCenterEnhanced from '../components/TemplateCenter/TemplateCenter_Enhanced';
@@ -33,6 +32,8 @@ import VersionPanelEnhanced from '../components/VersionPanel/VersionPanel_Enhanc
 import GraphViewer from '../components/GraphViewer/GraphViewer';
 import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
+import RelationshipManagerEnhanced from '../components/RelationshipManager/RelationshipManagerEnhanced';
+import DocumentManager from '../components/DocumentManager/DocumentManager';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -63,6 +64,7 @@ const EditorDemo = () => {
   const [useEnhancedTemplateCenter, setUseEnhancedTemplateCenter] = useState(true);
   const [useEnhancedVersionPanel, setUseEnhancedVersionPanel] = useState(true);
   const [useEnhancedBlockEditor, setUseEnhancedBlockEditor] = useState(true);
+  const [useEnhancedRelationshipManager, setUseEnhancedRelationshipManager] = useState(true);
   const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
   const [showRelationshipManager, setShowRelationshipManager] = useState(false);
 
@@ -167,11 +169,11 @@ const EditorDemo = () => {
       case 'documents':
         return (
           <DocumentManager 
-            onDocumentSelect={(document) => {
-              setCurrentDocument(document);
+            onSelectDocument={(doc) => {
+              setCurrentDocument(doc);
               setActivePanel('editor');
             }}
-            onClose={() => setActivePanel('editor')}
+            onCreateDocument={() => setShowNewDocumentModal(true)}
           />
         );
       case 'search':
@@ -258,6 +260,7 @@ const EditorDemo = () => {
                       关系管理
                     </button>
                     <button
+                      onClick={() => setUseEnhancedRelationshipManager(!useEnhancedRelationshipManager)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -265,14 +268,15 @@ const EditorDemo = () => {
                         padding: '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '6px',
-                        background: 'white',
-                        color: '#6b7280',
+                        background: useEnhancedRelationshipManager ? '#3b82f6' : 'white',
+                        color: useEnhancedRelationshipManager ? 'white' : '#6b7280',
                         fontSize: '12px',
                         cursor: 'pointer'
                       }}
                     >
-                      <Share2 size={14} />
-                      分享
+                      <Sparkles size={14} />
+                      {useEnhancedRelationshipManager ? '增强版' : '基础版'}
+                    </button>
                     </button>
                   </div>
                 </div>
@@ -437,8 +441,8 @@ const EditorDemo = () => {
           <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {[
-                { id: 'documents', label: '文档管理', icon: FolderOpen },
                 { id: 'editor', label: '编辑器', icon: Edit3 },
+                { id: 'documents', label: '文档管理', icon: FileText },
                 { id: 'search', label: '全局搜索', icon: Search },
                 { id: 'templates', label: '模板中心', icon: Layout },
                 { id: 'versions', label: '版本历史', icon: History },

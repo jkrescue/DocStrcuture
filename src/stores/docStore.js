@@ -2,7 +2,122 @@ import { create } from 'zustand';
 
 const useDocStore = create((set, get) => ({
   // 文档数据
-  documents: [],
+  documents: [
+    {
+      id: 'doc_1',
+      title: '产品需求文档 - 文档管理系统',
+      description: '详细描述文档管理系统的产品需求和功能规格',
+      blocks: [
+        {
+          id: 'block_doc1_1',
+          type: 'text',
+          content: { text: '# 产品需求文档 - 文档管理系统\n\n## 产品概述\n\n本系统旨在为团队提供高效的文档创建、管理和协作功能。' }
+        },
+        {
+          id: 'block_doc1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '产品名称',
+            value: '文档管理系统',
+            required: true
+          }
+        }
+      ],
+      metadata: {
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        author: '产品经理',
+        version: '2.1.0',
+        templateId: 'template_3',
+        category: 'document',
+        tags: ['产品', 'PRD', '需求']
+      }
+    },
+    {
+      id: 'doc_2',
+      title: '技术架构设计方案',
+      description: '系统技术架构的详细设计文档',
+      blocks: [
+        {
+          id: 'block_doc2_1',
+          type: 'text',
+          content: { text: '# 技术架构设计方案\n\n## 整体架构\n\n采用前后端分离的架构模式，前端使用React + Vite，后端使用Node.js + Express。' }
+        }
+      ],
+      metadata: {
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+        author: '技术负责人',
+        version: '1.3.0',
+        templateId: 'template_4',
+        category: 'document',
+        tags: ['技术', '架构', '设计']
+      }
+    },
+    {
+      id: 'doc_3',
+      title: '周例会纪要 - 第42周',
+      description: '第42周团队例会的会议纪要和行动项',
+      blocks: [
+        {
+          id: 'block_doc3_1',
+          type: 'text',
+          content: { text: '# 周例会纪要 - 第42周\n\n## 会议信息\n\n时间：2024年10月15日 14:00-15:00\n地点：会议室A\n主持人：项目经理' }
+        }
+      ],
+      metadata: {
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        author: '项目经理',
+        version: '1.0.0',
+        templateId: 'template_2',
+        category: 'meeting',
+        tags: ['会议', '例会', '纪要']
+      }
+    },
+    {
+      id: 'doc_4',
+      title: '用户研究报告',
+      description: '针对文档管理需求的用户调研分析报告',
+      blocks: [
+        {
+          id: 'block_doc4_1',
+          type: 'text',
+          content: { text: '# 用户研究报告\n\n## 研究背景\n\n为了更好地了解用户对文档管理工具的需求和使用习惯，我们开展了这次用户研究。' }
+        }
+      ],
+      metadata: {
+        createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+        author: '用户研究员',
+        version: '1.2.0',
+        category: 'report',
+        tags: ['用户研究', '调研', '报告']
+      }
+    },
+    {
+      id: 'doc_5',
+      title: '开发进度周报',
+      description: '本周开发团队的工作进展和下周计划',
+      blocks: [
+        {
+          id: 'block_doc5_1',
+          type: 'text',
+          content: { text: '# 开发进度周报\n\n## 本周完成工作\n\n1. 完成了文档管理组件的基础框架\n2. 实现了文档列表的展示功能\n3. 添加了文档创建和删除功能' }
+        }
+      ],
+      metadata: {
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        author: '开发团队',
+        version: '1.0.0',
+        templateId: 'template_5',
+        category: 'report',
+        tags: ['开发', '周报', '进度']
+      }
+    }
+  ],
   currentDocument: null,
   
   // 应用状态
