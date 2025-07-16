@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import EditorDemo from './pages/EditorDemo';
 import VersionComparisonTest from './pages/VersionComparisonTest';
+import VersionComparisonDemo from './pages/VersionComparisonDemo';
 import './styles/App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('editor'); // 'editor' 或 'comparison-test'
+  const [currentPage, setCurrentPage] = useState('editor'); // 'editor', 'comparison-test', 'comparison-demo'
 
   try {
     return (
@@ -46,10 +47,26 @@ function App() {
           >
             版本对比测试
           </button>
+          <button
+            onClick={() => setCurrentPage('comparison-demo')}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: currentPage === 'comparison-demo' ? '#007bff' : 'white',
+              color: currentPage === 'comparison-demo' ? 'white' : '#333',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            版本对比演示
+          </button>
         </div>
 
         {/* 页面内容 */}
-        {currentPage === 'editor' ? <EditorDemo /> : <VersionComparisonTest />}
+        {currentPage === 'editor' ? <EditorDemo /> : 
+         currentPage === 'comparison-test' ? <VersionComparisonTest /> :
+         <VersionComparisonDemo />}
       </div>
     );
   } catch (error) {
