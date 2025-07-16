@@ -7,6 +7,7 @@ import {
   History, BarChart3, Database, RefreshCw, PlayCircle, PauseCircle
 } from 'lucide-react';
 import { useDocStore } from '../../stores/docStore';
+import VersionComparison from '../VersionComparison/VersionComparisonTest';
 
 const VersionPanelEnhanced = ({ onClose, document }) => {
   const { versions, blocks, saveVersion, loadVersion } = useDocStore();
@@ -330,6 +331,36 @@ const VersionPanelEnhanced = ({ onClose, document }) => {
     setEnhancedVersions(prev => [newVersion, ...prev]);
     setNewVersionDescription('');
     setShowCreateForm(false);
+  };
+
+  // 对比模式处理
+  const startVersionComparison = () => {
+    console.log('=== Version Comparison Debug ===');
+    console.log('startVersionComparison called');
+    console.log('compareVersions:', compareVersions);
+    console.log('showVersionComparison:', showVersionComparison);
+    console.log('enhancedVersions length:', enhancedVersions.length);
+    
+    if (compareVersions.length === 2) {
+      const leftVersion = enhancedVersions.find(v => v.id === compareVersions[0]);
+      const rightVersion = enhancedVersions.find(v => v.id === compareVersions[1]);
+      
+      console.log('Found versions for comparison:');
+      console.log('leftVersion:', leftVersion);
+      console.log('rightVersion:', rightVersion);
+      console.log('leftVersion blocks:', leftVersion?.blocks);
+      console.log('rightVersion blocks:', rightVersion?.blocks);
+      
+      if (leftVersion && rightVersion) {
+        console.log('Setting showVersionComparison to true');
+        setShowVersionComparison(true);
+      } else {
+        console.log('ERROR: Could not find one or both versions');
+      }
+    } else {
+      console.log('ERROR: compareVersions length is not 2:', compareVersions.length);
+    }
+    console.log('================================');
   };
 
   const handleRestoreVersion = (version) => {
@@ -998,6 +1029,32 @@ const VersionPanelEnhanced = ({ onClose, document }) => {
     );
   };
 
+  // 如果显示版本对比，渲染对比组件
+  if (showVersionComparison && compareVersions.length === 2) {
+    const leftVersion = enhancedVersions.find(v => v.id === compareVersions[0]);
+    const rightVersion = enhancedVersions.find(v => v.id === compareVersions[1]);
+    
+    console.log('Rendering VersionComparison component:', { 
+      showVersionComparison, 
+      compareVersions, 
+      leftVersion, 
+      rightVersion 
+    });
+    
+    return (
+      <VersionComparison
+        leftVersion={leftVersion}
+        rightVersion={rightVersion}
+        onClose={() => {
+          setShowVersionComparison(false);
+          setCompareVersions([]);
+          setCompareMode(false);
+        }}
+        document={document}
+      />
+    );
+  }
+
   return (
     <div style={{ 
       height: '100vh', 
@@ -1308,7 +1365,7 @@ const VersionPanelEnhanced = ({ onClose, document }) => {
                 已选择 2 个版本进行对比
               </div>
               <button
-                onClick={() => setShowVersionComparison(true)}
+                onClick={() => startVersionComparison()}
                 style={{
                   padding: '8px 20px',
                   backgroundColor: 'white',

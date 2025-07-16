@@ -683,7 +683,7 @@ const useDocStore = create((set, get) => ({
       version: '1.0.0',
       name: '初始版本',
       author: '张三',
-      timestamp: '2024-01-15 10:30:00',
+      timestamp: new Date('2024-01-15 10:30:00').getTime(),
       description: '文档初始创建版本，包含基本结构和内容框架',
       changes: [
         '创建文档基本结构',
@@ -692,14 +692,30 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 5,
       status: 'published',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 文档管理系统\n\n## 项目概述\n\n这是一个全新的文档管理系统项目。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '文档管理系统V1',
+            required: true
+          }
+        }
+      ]
     },
     {
       id: 'v_2',
       version: '1.1.0',
       name: '需求补充',
       author: '李四',
-      timestamp: '2024-01-16 14:20:00',
+      timestamp: new Date('2024-01-16 14:20:00').getTime(),
       description: '补充详细需求分析和技术要求',
       changes: [
         '添加需求分析表格',
@@ -708,14 +724,47 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 8,
       status: 'published',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 文档管理系统\n\n## 项目概述\n\n这是一个全新的文档管理系统项目，旨在提供高效的文档管理能力。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '文档管理系统V1.1',
+            required: true
+          }
+        },
+        {
+          id: 'block_v2_1',
+          type: 'text',
+          content: { text: '## 需求分析\n\n### 功能需求\n\n1. 文档创建和编辑\n2. 版本控制\n3. 协作功能' }
+        },
+        {
+          id: 'block_v2_2',
+          type: 'table',
+          content: {
+            title: '功能优先级',
+            data: [
+              ['功能', '优先级', '状态'],
+              ['文档编辑', '高', '开发中'],
+              ['版本管理', '中', '计划中']
+            ]
+          }
+        }
+      ]
     },
     {
       id: 'v_3',
       version: '1.2.0',
       name: '架构优化',
       author: '王五',
-      timestamp: '2024-01-17 09:15:00',
+      timestamp: new Date('2024-01-17 09:15:00').getTime(),
       description: '优化技术架构设计，调整实施方案',
       changes: [
         '重构技术架构图',
@@ -725,14 +774,63 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 12,
       status: 'published',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 文档管理系统\n\n## 项目概述\n\n这是一个全新的文档管理系统项目，旨在提供高效的文档管理能力和协作体验。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '文档管理系统V1.2',
+            required: true
+          }
+        },
+        {
+          id: 'block_v2_1',
+          type: 'text',
+          content: { text: '## 需求分析\n\n### 功能需求\n\n1. 文档创建和编辑\n2. 版本控制系统\n3. 实时协作功能\n4. 权限管理' }
+        },
+        {
+          id: 'block_v2_2',
+          type: 'table',
+          content: {
+            title: '功能优先级',
+            data: [
+              ['功能', '优先级', '状态', '负责人'],
+              ['文档编辑', '高', '已完成', '张三'],
+              ['版本管理', '高', '开发中', '李四'],
+              ['协作功能', '中', '设计中', '王五']
+            ]
+          }
+        },
+        {
+          id: 'block_v3_1',
+          type: 'text',
+          content: { text: '## 技术架构\n\n### 前端架构\n\n- React 18 + Vite\n- Zustand 状态管理\n- Component-based 设计' }
+        },
+        {
+          id: 'block_v3_2',
+          type: 'field',
+          content: {
+            fieldType: 'select',
+            label: '架构模式',
+            value: '微前端',
+            options: ['单体应用', '微前端', '微服务']
+          }
+        }
+      ]
     },
     {
       id: 'v_4',
       version: '1.3.0-beta',
       name: 'Beta版本',
       author: '赵六',
-      timestamp: '2024-01-18 16:45:00',
+      timestamp: new Date('2024-01-18 16:45:00').getTime(),
       description: '测试版本，包含最新功能特性',
       changes: [
         '添加用户界面设计',
@@ -741,14 +839,79 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 15,
       status: 'draft',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 文档管理系统\n\n## 项目概述\n\n这是一个创新的文档管理系统项目，旨在提供高效的文档管理能力、实时协作体验和智能化功能。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '智能文档管理系统V1.3-Beta',
+            required: true
+          }
+        },
+        {
+          id: 'block_v2_1',
+          type: 'text',
+          content: { text: '## 需求分析\n\n### 核心功能需求\n\n1. 智能文档创建和编辑\n2. 高级版本控制系统\n3. 实时多人协作功能\n4. 细粒度权限管理\n5. AI辅助内容生成' }
+        },
+        {
+          id: 'block_v2_2',
+          type: 'table',
+          content: {
+            title: '功能开发状态',
+            data: [
+              ['功能模块', '优先级', '开发状态', '负责人', '完成度'],
+              ['智能编辑器', '高', '已完成', '张三', '95%'],
+              ['版本管理', '高', '测试中', '李四', '85%'],
+              ['协作功能', '高', '开发中', '王五', '70%'],
+              ['AI功能', '中', '原型中', '赵六', '30%']
+            ]
+          }
+        },
+        {
+          id: 'block_v3_1',
+          type: 'text',
+          content: { text: '## 技术架构\n\n### 前端架构升级\n\n- React 18 + Vite + TypeScript\n- Zustand 状态管理 + Immer\n- 模块化 Component 设计\n- Web Workers 性能优化' }
+        },
+        {
+          id: 'block_v3_2',
+          type: 'field',
+          content: {
+            fieldType: 'select',
+            label: '架构模式',
+            value: '混合架构',
+            options: ['单体应用', '微前端', '微服务', '混合架构']
+          }
+        },
+        {
+          id: 'block_v4_1',
+          type: 'reference',
+          content: {
+            sourceBlockId: 'block_v3_2',
+            sourceContent: {
+              fieldType: 'select',
+              label: '架构模式',
+              value: '混合架构'
+            },
+            sourceType: 'field',
+            lastSyncTime: new Date().toISOString(),
+            syncStatus: 'synced'
+          }
+        }
+      ]
     },
     {
       id: 'v_5',
       version: '2.0.0-rc1',
       name: '发布候选版',
       author: '张三',
-      timestamp: '2024-01-20 11:30:00',
+      timestamp: new Date('2024-01-20 11:30:00').getTime(),
       description: '2.0版本发布候选，准备正式发布',
       changes: [
         '完善所有功能模块',
@@ -758,14 +921,65 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 18,
       status: 'review',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 智能文档管理系统 2.0\n\n## 项目概述\n\n这是新一代智能文档管理系统，集成了AI能力、高级协作功能和企业级安全特性。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '智能文档管理系统V2.0-RC1',
+            required: true
+          }
+        },
+        {
+          id: 'block_v2_1',
+          type: 'text',
+          content: { text: '## 功能特性\n\n### 核心功能\n\n1. AI驱动的智能文档创建\n2. 企业级版本控制系统\n3. 无缝实时协作体验\n4. 高级权限和安全管理\n5. 智能内容推荐和搜索\n6. 多平台同步支持' }
+        },
+        {
+          id: 'block_v2_2',
+          type: 'table',
+          content: {
+            title: '发布准备状态',
+            data: [
+              ['功能模块', '完成度', '测试状态', '负责人', '发布状态'],
+              ['AI编辑器', '100%', '通过', '张三', '✅ 就绪'],
+              ['版本管理', '100%', '通过', '李四', '✅ 就绪'],
+              ['协作功能', '98%', '进行中', '王五', '🔄 测试'],
+              ['安全模块', '95%', '进行中', '赵六', '🔄 测试'],
+              ['移动端', '90%', '待测试', '孙七', '⏳ 开发']
+            ]
+          }
+        },
+        {
+          id: 'block_v3_1',
+          type: 'text',
+          content: { text: '## 技术架构 2.0\n\n### 全栈技术升级\n\n**前端：**\n- React 18 + TypeScript + Vite\n- Zustand + React Query\n- Web Components + Micro Frontend\n\n**后端：**\n- Node.js + Express + TypeScript\n- MongoDB + Redis\n- GraphQL API' }
+        },
+        {
+          id: 'block_v5_1',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '性能目标',
+            value: '首屏加载 < 2s，编辑响应 < 100ms',
+            required: true
+          }
+        }
+      ]
     },
     {
       id: 'v_6',
       version: '2.0.0',
       name: '正式发布版',
       author: '李四',
-      timestamp: '2024-01-22 10:00:00',
+      timestamp: new Date('2024-01-22 10:00:00').getTime(),
       description: '2.0正式版本，包含完整功能和文档',
       changes: [
         '发布正式版本',
@@ -774,7 +988,74 @@ const useDocStore = create((set, get) => ({
       ],
       blockCount: 20,
       status: 'published',
-      blocksSnapshot: []
+      blocks: [
+        {
+          id: 'block_v1_1',
+          type: 'text',
+          content: { text: '# 智能文档管理系统 2.0 正式版\n\n## 项目概述\n\n🎉 正式发布！新一代智能文档管理系统现已上线，为用户提供前所未有的文档创作和协作体验。' }
+        },
+        {
+          id: 'block_v1_2',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '项目名称',
+            value: '智能文档管理系统V2.0',
+            required: true
+          }
+        },
+        {
+          id: 'block_v2_1',
+          type: 'text',
+          content: { text: '## 🚀 全新功能特性\n\n### 已发布功能\n\n1. ✅ AI驱动的智能文档创建和编辑\n2. ✅ 企业级版本控制和分支管理\n3. ✅ 实时多人协作和评论系统\n4. ✅ 高级权限管理和数据安全\n5. ✅ 智能搜索和内容发现\n6. ✅ 全平台同步和离线支持\n7. ✅ 丰富的模板库和自定义组件' }
+        },
+        {
+          id: 'block_v2_2',
+          type: 'table',
+          content: {
+            title: '正式版功能清单',
+            data: [
+              ['功能模块', '版本', '状态', '负责团队', '用户评分'],
+              ['AI编辑器', 'v2.0', '✅ 已发布', '前端团队', '4.8/5.0'],
+              ['版本管理', 'v2.0', '✅ 已发布', '后端团队', '4.9/5.0'],
+              ['协作功能', 'v2.0', '✅ 已发布', '全栈团队', '4.7/5.0'],
+              ['安全模块', 'v2.0', '✅ 已发布', '安全团队', '4.6/5.0'],
+              ['移动应用', 'v2.0', '✅ 已发布', '移动团队', '4.5/5.0'],
+              ['API平台', 'v2.0', '✅ 已发布', 'API团队', '4.8/5.0']
+            ]
+          }
+        },
+        {
+          id: 'block_v3_1',
+          type: 'text',
+          content: { text: '## 🏗️ 成熟的技术架构\n\n### 生产级技术栈\n\n**前端架构：**\n- React 18 + TypeScript + Vite\n- Zustand + React Query + Immer\n- Micro Frontend Architecture\n- PWA + Service Workers\n\n**后端架构：**\n- Node.js + Express + TypeScript\n- MongoDB + Redis + Elasticsearch\n- GraphQL + REST API\n- Docker + Kubernetes' }
+        },
+        {
+          id: 'block_v5_1',
+          type: 'field',
+          content: {
+            fieldType: 'text',
+            label: '性能指标',
+            value: '首屏加载 1.2s，编辑响应 50ms，99.9%可用性',
+            required: true
+          }
+        },
+        {
+          id: 'block_v6_1',
+          type: 'text',
+          content: { text: '## 📊 发布成果\n\n### 关键指标\n\n- 📈 性能提升 300%\n- 👥 支持 1000+ 并发用户\n- 🔒 通过 SOC2 安全认证\n- 🌍 支持 15+ 语言\n- 📱 iOS、Android 原生应用\n- 🔌 50+ 第三方集成' }
+        },
+        {
+          id: 'block_v6_2',
+          type: 'field',
+          content: {
+            fieldType: 'date',
+            label: '正式发布日期',
+            value: '2024-01-22',
+            required: true
+          }
+        }
+      ]
     }
   ],
 
