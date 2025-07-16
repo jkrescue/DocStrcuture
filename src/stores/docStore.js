@@ -164,6 +164,7 @@ const useDocStore = create((set, get) => ({
   
   currentDocument: null,
   currentFolderId: null, // 当前所在的文件夹ID，null表示根目录
+  recentlyOpenedDocuments: ['doc_1', 'doc_3', 'doc_5', 'doc_2'], // 最近打开的文档ID列表，按时间倒序
   
   // 应用状态
   searchQuery: '',
@@ -500,7 +501,21 @@ const useDocStore = create((set, get) => ({
     documents: [...state.documents, document]
   })),
   
-  setCurrentDocument: (document) => set({ currentDocument: document }),
+  setCurrentDocument: (document) => set((state) => {
+    if (!document) return { currentDocument: document };
+    
+    // 更新最近打开的文档列表
+    const recentlyOpened = state.recentlyOpenedDocuments.filter(id => id !== document.id);
+    recentlyOpened.unshift(document.id);
+    
+    // 只保留最近的10个文档记录
+    const limitedRecent = recentlyOpened.slice(0, 10);
+    
+    return {
+      currentDocument: document,
+      recentlyOpenedDocuments: limitedRecent
+    };
+  }),
   
   updateCurrentDocument: (updates) => set((state) => ({
     currentDocument: state.currentDocument ? { ...state.currentDocument, ...updates } : null,
@@ -873,6 +888,15 @@ const useDocStore = create((set, get) => ({
     }
     
     return path;
+  },
+
+  // 获取最近打开的文档
+  getRecentlyOpenedDocuments: (limit = 6) => {
+    const state = get();
+    return state.recentlyOpenedDocuments
+      .map(id => state.documents.find(doc => doc.id === id))
+      .filter(Boolean) // 过滤掉已删除的文档
+      .slice(0, limit);
   }
 }));
 

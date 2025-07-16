@@ -52,7 +52,8 @@ const EditorDemo = () => {
     updateBlockInDocument,
     deleteBlockFromDocument,
     setSelectedBlocks,
-    setCollaborativeMode
+    setCollaborativeMode,
+    getRecentlyOpenedDocuments
   } = useDocStore();
 
   const [activePanel, setActivePanel] = useState('editor');
@@ -471,7 +472,7 @@ const EditorDemo = () => {
 
           {/* 文档列表 */}
           <div style={{ flex: 1, padding: '12px 16px', overflow: 'auto' }}>
-            {/* 工作区文档 */}
+            {/* 最近打开的文档 */}
             <div style={{ marginBottom: '16px' }}>
               <div
                 onClick={() => setWorkspaceExpanded(!workspaceExpanded)}
@@ -489,12 +490,12 @@ const EditorDemo = () => {
                 }}
               >
                 {workspaceExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                我的文档 ({documents.length})
+                最近打开 ({getRecentlyOpenedDocuments(6).length})
               </div>
               {workspaceExpanded && (
                 <div style={{ marginTop: '8px' }}>
-                  {documents.length > 0 ? (
-                    documents.map(renderDocumentItem)
+                  {getRecentlyOpenedDocuments(6).length > 0 ? (
+                    getRecentlyOpenedDocuments(6).map(renderDocumentItem)
                   ) : (
                     <div style={{ 
                       padding: '12px',
@@ -502,7 +503,7 @@ const EditorDemo = () => {
                       color: '#9ca3af',
                       fontSize: '12px'
                     }}>
-                      还没有文档
+                      还没有打开过文档
                     </div>
                   )}
                 </div>
