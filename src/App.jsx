@@ -3,11 +3,10 @@ import EditorDemo from './pages/EditorDemo';
 import VersionComparisonTest from './pages/VersionComparisonTest';
 import VersionComparisonDemo from './pages/VersionComparisonDemo';
 import AISmartApprovalDemo from './pages/AISmartApprovalDemo';
-import TestComponent from './pages/TestComponent';
 import './styles/App.css';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('test'); // 'editor', 'comparison-demo', 'ai-approval', 'test'
+  const [currentPage, setCurrentPage] = useState('ai-approval'); // 'editor', 'comparison-demo', 'ai-approval'
 
   try {
     return (
@@ -44,23 +43,12 @@ function App() {
           >
             AI智能审批
           </button>
-          <button
-            onClick={() => setCurrentPage('test')}
-            className="page-switcher-button"
-            style={{
-              backgroundColor: currentPage === 'test' ? '#10b981' : 'white',
-              color: currentPage === 'test' ? 'white' : '#374151'
-            }}
-          >
-            测试页面
-          </button>
         </div>
 
         {/* 页面内容 */}
         {currentPage === 'editor' && <EditorDemo />}
         {currentPage === 'comparison-demo' && <VersionComparisonDemo />}
         {currentPage === 'ai-approval' && <AISmartApprovalDemo />}
-        {currentPage === 'test' && <TestComponent />}
       </div>
     );
   } catch (error) {
