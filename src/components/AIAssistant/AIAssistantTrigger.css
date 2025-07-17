@@ -1,0 +1,377 @@
+/* AI Assistant Trigger Styles */
+.ai-assistant-trigger {
+  position: relative;
+  display: inline-block;
+}
+
+/* 主触发按钮 */
+.trigger-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  overflow: hidden;
+}
+
+.trigger-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+}
+
+.trigger-button.has-suggestions {
+  animation: glow 2s infinite ease-in-out;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(102, 126, 234, 0.8), 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+}
+
+.button-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sparkle-overlay {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  color: #fbbf24;
+  animation: sparkle 3s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: scale(0.8) rotate(0deg); 
+  }
+  33% { 
+    opacity: 1; 
+    transform: scale(1.2) rotate(120deg); 
+  }
+  66% { 
+    opacity: 0.6; 
+    transform: scale(1) rotate(240deg); 
+  }
+}
+
+/* 通知徽章 */
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 2px solid white;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* 脉冲环 */
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border: 2px solid rgba(102, 126, 234, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite ease-out;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* 快速操作面板 */
+.quick-actions-panel {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  border: 1px solid #e5e7eb;
+}
+
+.ai-assistant-trigger:hover .quick-actions-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+.quick-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-action:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+/* 通知气泡 */
+.notification-bubble {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  opacity: 0;
+  visibility: hidden;
+  animation: slideInBubble 0.5s ease forwards;
+  z-index: 100;
+}
+
+.ai-assistant-trigger:hover .notification-bubble,
+.trigger-button.has-suggestions ~ .notification-bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+@keyframes slideInBubble {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bubble-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.bubble-content {
+  padding: 16px;
+}
+
+.latest-notification {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.view-all-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-all-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.bubble-arrow {
+  position: absolute;
+  bottom: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+/* 浮动状态 */
+.ai-assistant-trigger.floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+/* 内联状态 */
+.ai-assistant-trigger.inline {
+  position: relative;
+  display: inline-flex;
+}
+
+.ai-assistant-trigger.inline .trigger-button {
+  width: 40px;
+  height: 40px;
+}
+
+.ai-assistant-trigger.inline .pulse-ring {
+  width: 40px;
+  height: 40px;
+}
+
+.ai-assistant-trigger.inline .quick-actions-panel {
+  bottom: 50px;
+}
+
+.ai-assistant-trigger.inline .notification-bubble {
+  bottom: 50px;
+  width: 240px;
+}
+
+/* 紧凑模式 */
+.ai-assistant-trigger.compact .trigger-button {
+  width: 36px;
+  height: 36px;
+}
+
+.ai-assistant-trigger.compact .button-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-assistant-trigger.compact .sparkle-overlay {
+  width: 12px;
+  height: 12px;
+  top: -6px;
+  right: -6px;
+}
+
+.ai-assistant-trigger.compact .notification-badge {
+  min-width: 16px;
+  height: 16px;
+  font-size: 10px;
+  top: -2px;
+  right: -2px;
+}
+
+.ai-assistant-trigger.compact .pulse-ring {
+  width: 36px;
+  height: 36px;
+}
+
+/* 主题变体 */
+.ai-assistant-trigger.theme-blue .trigger-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+
+.ai-assistant-trigger.theme-green .trigger-button {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.ai-assistant-trigger.theme-purple .trigger-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ai-assistant-trigger.floating {
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .notification-bubble {
+    width: 260px;
+    right: -120px;
+  }
+  
+  .quick-actions-panel {
+    right: -80px;
+  }
+}
+
+/* 无障碍支持 */
+.trigger-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.trigger-button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 减少动画（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  .trigger-button,
+  .pulse-ring,
+  .sparkle-overlay,
+  .notification-badge,
+  .quick-actions-panel,
+  .notification-bubble {
+    animation: none;
+    transition: none;
+  }
+}
