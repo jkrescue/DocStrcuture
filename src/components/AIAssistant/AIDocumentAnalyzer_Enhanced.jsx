@@ -1372,15 +1372,15 @@ const AIDocumentAnalyzer = ({ isVisible, onClose, documentContent = "" }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="ai-analyzer-overlay">
-      <div className="ai-analyzer-panel">
+    <div className="ai-analyzer-sidebar">
+      <div className="ai-analyzer-panel-sidebar">
         {/* 头部 */}
-        <div className="analyzer-header">
+        <div className="analyzer-header-sidebar">
           <div className="header-left">
             <Brain className="header-icon" />
             <div>
-              <h3>AI 内容校核与一致性验证</h3>
-              <p>基于AI_support.md规范的智能分析系统</p>
+              <h3>AI 内容校核</h3>
+              <p>智能分析系统</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -1389,7 +1389,7 @@ const AIDocumentAnalyzer = ({ isVisible, onClose, documentContent = "" }) => {
         </div>
 
         {/* 文档类型选择 */}
-        <div className="document-type-selector">
+        <div className="document-type-selector-sidebar">
           <label>文档类型：</label>
           <select 
             value={selectedDocumentType} 
@@ -1415,15 +1415,15 @@ const AIDocumentAnalyzer = ({ isVisible, onClose, documentContent = "" }) => {
 
         {/* 分析状态 */}
         {isAnalyzing && (
-          <div className="analyzing-status">
+          <div className="analyzing-status-sidebar">
             <RefreshCw className="spin" />
-            <span>AI正在分析文档内容...</span>
+            <span>分析中...</span>
           </div>
         )}
 
         {/* 四大核心功能模块 */}
         {!isAnalyzing && (
-          <div className="analysis-content">
+          <div className="analysis-content-sidebar">
             
             {/* 1. 信息抽取自动化 */}
             <div className="analysis-section">
