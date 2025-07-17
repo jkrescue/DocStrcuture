@@ -45,19 +45,31 @@ const generateDocumentAnalysis = (content, documentType = 'general') => {
     lastAnalyzed: new Date().toISOString()
   };
 
-  // 智能检测文档类型
+  // 智能检测文档类型（车型研发场景）
   const detectedType = (() => {
-    if (content.includes('开发') && (content.includes('进度') || content.includes('周报'))) {
+    if (content.includes('车型') || content.includes('汽车') || content.includes('整车') || content.includes('底盘') || content.includes('发动机') || content.includes('变速箱')) {
+      if (content.includes('需求') || content.includes('规格') || content.includes('参数')) {
+        return 'vehicle_requirements';
+      }
+      if (content.includes('设计') || content.includes('方案') || content.includes('图纸')) {
+        return 'vehicle_design';
+      }
+      if (content.includes('测试') || content.includes('试验') || content.includes('验证')) {
+        return 'vehicle_testing';
+      }
+      return 'vehicle_project';
+    }
+    if (content.includes('项目') && (content.includes('进度') || content.includes('计划') || content.includes('里程碑'))) {
+      return 'project_management';
+    }
+    if (content.includes('技术') || content.includes('规范') || content.includes('标准') || content.includes('工艺') || content.includes('制造')) {
+      return 'technical_spec';
+    }
+    if (content.includes('开发') && (content.includes('周报') || content.includes('月报') || content.includes('报告'))) {
       return 'development_report';
     }
     if (content.includes('合同') || content.includes('协议') || content.includes('签约') || content.includes('甲方') || content.includes('乙方')) {
       return 'contract';
-    }
-    if (content.includes('技术') || content.includes('规范') || content.includes('标准') || content.includes('API') || content.includes('接口') || content.includes('架构') || content.includes('React') || content.includes('Vue') || content.includes('Node.js')) {
-      return 'technical';
-    }
-    if (content.includes('开发') || content.includes('计划') || content.includes('项目') || content.includes('里程碑')) {
-      return 'development_plan';
     }
     return 'general';
   })();
@@ -83,9 +95,392 @@ const generateDocumentAnalysis = (content, documentType = 'general') => {
   };
 };
 
-// 1. 信息抽取自动化功能
+// 1. 信息抽取自动化功能（车型研发场景优化）
 const generateExtractedFields = (content, documentType) => {
-  // 根据文档类型提取不同的关键字段
+  // 车型需求规格文档
+  if (documentType === 'vehicle_requirements') {
+    return {
+      title: '车型需求信息提取',
+      description: '自动识别车型研发需求规格中的关键参数',
+      fields: [
+        { 
+          id: 'vehicle_model',
+          label: '车型代码', 
+          value: 'VH-2024-SUV-001', 
+          confidence: 0.95,
+          source: '标题识别',
+          location: '文档头部',
+          editable: true,
+          validated: true,
+          extractionMethod: '车型编码模式识别'
+        },
+        { 
+          id: 'engine_type',
+          label: '发动机类型', 
+          value: '2.0T涡轮增压', 
+          confidence: 0.92,
+          source: '技术规格',
+          location: '动力系统章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '发动机规格提取'
+        },
+        { 
+          id: 'transmission',
+          label: '变速箱', 
+          value: '8AT自动变速箱', 
+          confidence: 0.90,
+          source: '技术规格',
+          location: '传动系统章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '变速箱类型识别'
+        },
+        { 
+          id: 'fuel_consumption',
+          label: '油耗指标', 
+          value: '7.8L/100km', 
+          confidence: 0.88,
+          source: '性能参数',
+          location: '燃油经济性章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '数值单位识别'
+        },
+        { 
+          id: 'wheelbase',
+          label: '轴距', 
+          value: '2750mm', 
+          confidence: 0.94,
+          source: '车身尺寸',
+          location: '外观设计章节',
+          editable: true,
+          validated: true,
+          extractionMethod: '尺寸参数提取'
+        },
+        { 
+          id: 'target_market',
+          label: '目标市场', 
+          value: '中高端SUV市场', 
+          confidence: 0.85,
+          source: '市场定位',
+          location: '产品定位章节',
+          editable: true,
+          validated: false,
+          extractionMethod: 'NLP市场分析'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'vehicle_requirements_template_v1.0',
+      autoRecognitionPatterns: [
+        '车型代码: VH-YYYY-TYPE-NNN',
+        '发动机: N.NT/自然吸气/混动',
+        '变速箱: NAT/CVT/DCT',
+        '油耗: N.NL/100km',
+        '尺寸: NNNNmm'
+      ]
+    };
+  }
+  
+  // 车型设计文档
+  if (documentType === 'vehicle_design') {
+    return {
+      title: '车型设计信息提取',
+      description: '自动识别车型设计方案中的关键设计要素',
+      fields: [
+        { 
+          id: 'design_phase',
+          label: '设计阶段', 
+          value: 'CD阶段', 
+          confidence: 0.93,
+          source: '阶段标识',
+          location: '项目状态',
+          editable: true,
+          validated: true,
+          extractionMethod: '设计阶段识别'
+        },
+        { 
+          id: 'styling_theme',
+          label: '造型主题', 
+          value: '运动时尚', 
+          confidence: 0.87,
+          source: '设计理念',
+          location: '外观设计章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '设计风格提取'
+        },
+        { 
+          id: 'material_type',
+          label: '主要材料', 
+          value: '高强度钢+铝合金', 
+          confidence: 0.91,
+          source: '材料规格',
+          location: '车身结构章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '材料类型识别'
+        },
+        { 
+          id: 'safety_rating',
+          label: '安全等级', 
+          value: 'C-NCAP 5星', 
+          confidence: 0.89,
+          source: '安全标准',
+          location: '安全性能章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '安全标准提取'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'vehicle_design_template_v1.0',
+      autoRecognitionPatterns: [
+        '设计阶段: CD|DD|PD|SOP',
+        '材料: 钢|铝|碳纤维|复合材料',
+        '安全等级: C-NCAP|E-NCAP|IIHS',
+        '造型: 运动|商务|时尚|越野'
+      ]
+    };
+  }
+  
+  // 车型测试文档
+  if (documentType === 'vehicle_testing') {
+    return {
+      title: '车型测试信息提取',
+      description: '自动识别车型测试验证中的关键测试数据',
+      fields: [
+        { 
+          id: 'test_type',
+          label: '测试类型', 
+          value: '整车道路测试', 
+          confidence: 0.95,
+          source: '测试分类',
+          location: '测试计划',
+          editable: true,
+          validated: true,
+          extractionMethod: '测试类型识别'
+        },
+        { 
+          id: 'test_mileage',
+          label: '测试里程', 
+          value: '50000km', 
+          confidence: 0.92,
+          source: '里程统计',
+          location: '测试进度',
+          editable: true,
+          validated: false,
+          extractionMethod: '里程数值提取'
+        },
+        { 
+          id: 'durability_result',
+          label: '耐久性结果', 
+          value: '通过', 
+          confidence: 0.88,
+          source: '测试结果',
+          location: '耐久性测试章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '结果状态识别'
+        },
+        { 
+          id: 'emission_level',
+          label: '排放标准', 
+          value: '国六B', 
+          confidence: 0.94,
+          source: '排放测试',
+          location: '环保性能章节',
+          editable: true,
+          validated: true,
+          extractionMethod: '排放标准识别'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'vehicle_testing_template_v1.0',
+      autoRecognitionPatterns: [
+        '测试类型: 整车|部件|系统|材料',
+        '里程: NNNNNkm',
+        '结果: 通过|失败|待定',
+        '排放: 国六|欧六|美标'
+      ]
+    };
+  }
+  
+  // 车型项目管理文档
+  if (documentType === 'vehicle_project') {
+    return {
+      title: '车型项目信息提取',
+      description: '自动识别车型项目管理中的关键项目信息',
+      fields: [
+        { 
+          id: 'project_code',
+          label: '项目代码', 
+          value: 'P2024-SUV-001', 
+          confidence: 0.96,
+          source: '项目标识',
+          location: '项目基本信息',
+          editable: true,
+          validated: true,
+          extractionMethod: '项目编码识别'
+        },
+        { 
+          id: 'sop_date',
+          label: 'SOP时间', 
+          value: '2025年12月', 
+          confidence: 0.91,
+          source: '时间计划',
+          location: '项目里程碑',
+          editable: true,
+          validated: false,
+          extractionMethod: '日期提取'
+        },
+        { 
+          id: 'project_budget',
+          label: '项目预算', 
+          value: '15亿元', 
+          confidence: 0.89,
+          source: '预算信息',
+          location: '项目投资',
+          editable: true,
+          validated: false,
+          extractionMethod: '金额识别'
+        },
+        { 
+          id: 'team_size',
+          label: '团队规模', 
+          value: '280人', 
+          confidence: 0.87,
+          source: '组织架构',
+          location: '项目团队',
+          editable: true,
+          validated: false,
+          extractionMethod: '人员数量统计'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'vehicle_project_template_v1.0',
+      autoRecognitionPatterns: [
+        '项目代码: P-YYYY-TYPE-NNN',
+        'SOP: YYYY年MM月',
+        '预算: NN亿元/NN万元',
+        '团队: NNN人'
+      ]
+    };
+  }
+  
+  // 项目管理文档
+  if (documentType === 'project_management') {
+    return {
+      title: '项目管理信息提取',
+      description: '自动识别项目管理文档中的关键项目信息',
+      fields: [
+        { 
+          id: 'project_name',
+          label: '项目名称', 
+          value: '新能源SUV开发项目', 
+          confidence: 0.94,
+          source: '标题识别',
+          location: '项目概述',
+          editable: true,
+          validated: true,
+          extractionMethod: '项目名称提取'
+        },
+        { 
+          id: 'project_manager',
+          label: '项目经理', 
+          value: '张工程师', 
+          confidence: 0.89,
+          source: '人员信息',
+          location: '项目团队',
+          editable: true,
+          validated: false,
+          extractionMethod: '人员角色识别'
+        },
+        { 
+          id: 'completion_rate',
+          label: '完成进度', 
+          value: '65%', 
+          confidence: 0.92,
+          source: '进度统计',
+          location: '进度跟踪',
+          editable: true,
+          validated: false,
+          extractionMethod: '百分比提取'
+        },
+        { 
+          id: 'milestone_count',
+          label: '里程碑数量', 
+          value: '8个', 
+          confidence: 0.87,
+          source: '里程碑统计',
+          location: '项目计划',
+          editable: true,
+          validated: false,
+          extractionMethod: '数量统计'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'project_management_template_v1.0',
+      autoRecognitionPatterns: [
+        '项目: XX项目/XX开发',
+        '进度: NN%',
+        '里程碑: NN个',
+        '经理: XX工程师/XX经理'
+      ]
+    };
+  }
+  
+  // 技术规范文档  
+  if (documentType === 'technical_spec') {
+    return {
+      title: '技术规范信息提取',
+      description: '自动识别技术规范文档中的关键技术参数',
+      fields: [
+        { 
+          id: 'spec_version',
+          label: '规范版本', 
+          value: 'v2.1.0', 
+          confidence: 0.95,
+          source: '版本标识',
+          location: '文档头部',
+          editable: true,
+          validated: true,
+          extractionMethod: '版本号识别'
+        },
+        { 
+          id: 'technical_standard',
+          label: '技术标准', 
+          value: 'GB/T 19596-2017', 
+          confidence: 0.91,
+          source: '标准引用',
+          location: '标准章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '标准编号识别'
+        },
+        { 
+          id: 'tolerance_level',
+          label: '公差等级', 
+          value: '±0.1mm', 
+          confidence: 0.89,
+          source: '精度要求',
+          location: '技术要求',
+          editable: true,
+          validated: false,
+          extractionMethod: '公差值提取'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'technical_spec_template_v1.0',
+      autoRecognitionPatterns: [
+        '版本: vN.N.N',
+        '标准: GB/T|ISO|SAE',
+        '公差: ±N.Nmm'
+      ]
+    };
+  }
+  
+  // 原有的合同文档处理
   if (documentType === 'contract') {
     return {
       title: '自动提取字段',
@@ -351,12 +746,168 @@ const generateExtractedFields = (content, documentType) => {
   };
 };
 
-// 2. 段落冲突检测功能
+// 2. 段落冲突检测功能（车型研发场景优化）
 const generateConflictDetection = (content, documentType) => {
   const conflicts = [];
   
-  // 模拟检测到的冲突
+  // 车型需求规格冲突检测
+  if (documentType === 'vehicle_requirements') {
+    conflicts.push({
+      id: 'conflict_1',
+      type: 'parameter_inconsistency',
+      severity: 'high',
+      title: '动力参数不一致',
+      description: '发动机功率在不同章节中描述不同',
+      sourceLocation: { paragraph: 3, sentence: 1 },
+      conflictLocation: { paragraph: 7, sentence: 2 },
+      sourceContent: '最大功率为180kW',
+      conflictContent: '峰值功率达到185kW',
+      detectionMethod: '数值参数检测',
+      confidence: 0.94,
+      suggestion: '请核实发动机准确功率参数，确保技术规格一致性',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+    
+    conflicts.push({
+      id: 'conflict_2',
+      type: 'specification_mismatch',
+      severity: 'medium',
+      title: '车身尺寸不匹配',
+      description: '车长尺寸在概述与详细规格中不符',
+      sourceLocation: { paragraph: 2, sentence: 3 },
+      conflictLocation: { paragraph: 6, sentence: 1 },
+      sourceContent: '车身长度4680mm',
+      conflictContent: '整车长度4685mm',
+      detectionMethod: '尺寸参数匹配',
+      confidence: 0.89,
+      suggestion: '建议统一车身长度表述，确认最终设计尺寸',
+      status: 'unresolved',
+      reviewRequired: false
+    });
+  }
+  
+  // 车型设计方案冲突检测
+  if (documentType === 'vehicle_design') {
+    conflicts.push({
+      id: 'conflict_3',
+      type: 'design_inconsistency',
+      severity: 'medium',
+      title: '材料选择不一致',
+      description: '车身材料在不同设计阶段描述不同',
+      sourceLocation: { paragraph: 4, sentence: 2 },
+      conflictLocation: { paragraph: 8, sentence: 1 },
+      sourceContent: '采用高强度钢车身结构',
+      conflictContent: '车身主体使用铝合金材料',
+      detectionMethod: '材料术语检测',
+      confidence: 0.86,
+      suggestion: '明确车身材料选择，统一设计方案描述',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+  }
+  
+  // 车型测试验证冲突检测
+  if (documentType === 'vehicle_testing') {
+    conflicts.push({
+      id: 'conflict_4',
+      type: 'test_result_inconsistency',
+      severity: 'high',
+      title: '测试结果不一致',
+      description: '油耗测试结果在不同测试条件下差异较大',
+      sourceLocation: { paragraph: 5, sentence: 1 },
+      conflictLocation: { paragraph: 9, sentence: 2 },
+      sourceContent: '综合油耗7.8L/100km',
+      conflictContent: '实际油耗测试8.2L/100km',
+      detectionMethod: '测试数据对比',
+      confidence: 0.91,
+      suggestion: '分析测试条件差异，说明油耗数据的测试场景',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+  }
+  
+  // 车型项目管理冲突检测
+  if (documentType === 'vehicle_project') {
+    conflicts.push({
+      id: 'conflict_5',
+      type: 'timeline_inconsistency',
+      severity: 'medium',
+      title: '项目时间不一致',
+      description: 'SOP时间在项目计划与里程碑中不符',
+      sourceLocation: { paragraph: 2, sentence: 2 },
+      conflictLocation: { paragraph: 6, sentence: 3 },
+      sourceContent: 'SOP计划2025年12月',
+      conflictContent: '量产时间2026年1月',
+      detectionMethod: '时间对比检测',
+      confidence: 0.88,
+      suggestion: '确认准确的SOP时间，保持项目计划一致性',
+      status: 'unresolved',
+      reviewRequired: false
+    });
+  }
+  
+  // 项目管理文档冲突检测
+  if (documentType === 'project_management') {
+    conflicts.push({
+      id: 'conflict_6',
+      type: 'progress_inconsistency',
+      severity: 'medium',
+      title: '进度数据不一致',
+      description: '项目完成率在不同报告中存在差异',
+      sourceLocation: { paragraph: 3, sentence: 1 },
+      conflictLocation: { paragraph: 7, sentence: 2 },
+      sourceContent: '项目完成率65%',
+      conflictContent: '总体进度达到70%',
+      detectionMethod: '进度数据对比',
+      confidence: 0.85,
+      suggestion: '统一进度统计口径，确保数据准确性',
+      status: 'unresolved',
+      reviewRequired: false
+    });
+  }
+  
+  // 技术规范文档冲突检测
+  if (documentType === 'technical_spec') {
+    conflicts.push({
+      id: 'conflict_7',
+      type: 'standard_inconsistency',
+      severity: 'high',
+      title: '技术标准不一致',
+      description: '引用的技术标准版本在不同章节中不同',
+      sourceLocation: { paragraph: 2, sentence: 1 },
+      conflictLocation: { paragraph: 5, sentence: 3 },
+      sourceContent: '按照GB/T 19596-2017标准',
+      conflictContent: '依据GB/T 19596-2020标准',
+      detectionMethod: '标准版本检测',
+      confidence: 0.93,
+      suggestion: '确认采用的标准版本，保持技术规范一致性',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+  }
+  
+  // 原有文档类型的冲突检测
   if (documentType === 'development_plan') {
+    conflicts.push({
+      id: 'conflict_8',
+      type: 'content_inconsistency',
+      severity: 'medium',
+      title: '技术栈描述不一致',
+      description: '第3段与第5段关于前端框架的描述存在冲突',
+      sourceLocation: { paragraph: 3, sentence: 2 },
+      conflictLocation: { paragraph: 5, sentence: 1 },
+      sourceContent: '我们将使用React 18进行前端开发',
+      conflictContent: '前端采用Vue 3框架实现',
+      detectionMethod: '文本相似度 + 预定义规则',
+      confidence: 0.87,
+      suggestion: '建议统一为React 18，确保技术栈一致性',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+  }
+  
+  if (documentType === 'contract') {
     conflicts.push({
       id: 'conflict_1',
       type: 'content_inconsistency',
@@ -721,8 +1272,59 @@ const AIDocumentAnalyzer = ({ isVisible, onClose, documentContent = "" }) => {
     // 模拟AI分析过程
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 使用当前文档内容或模拟内容进行分析
-    const contentToAnalyze = documentContent || "技术架构设计方案 整体架构 采用前后端分离的架构模式，前端使用React + Vite，后端使用Node.js + Express。前端技术栈 - React 18.x - Vite 4.x - Zustand (状态管理) - BlockNote (富文本编辑器) - Lucide React (图标库) 后端技术栈 - Node.js 18.x - Express.js - MongoDB - Redis (缓存) - WebSocket (实时通信)";
+    // 使用当前文档内容或车型研发示例内容进行分析
+    const contentToAnalyze = documentContent || `
+    新能源SUV车型开发项目技术规格书
+    
+    项目概述
+    项目代码：P2024-SUV-001
+    车型定位：中高端新能源SUV
+    目标市场：家庭用户、商务用户
+    SOP时间：2025年12月
+    项目预算：15亿元
+    
+    动力系统规格
+    发动机类型：2.0T涡轮增压发动机
+    最大功率：180kW@5500rpm
+    峰值扭矩：350N·m@2000-4500rpm
+    电机功率：120kW
+    综合最大功率：260kW
+    
+    车身参数
+    车身长度：4680mm
+    车身宽度：1880mm
+    车身高度：1680mm
+    轴距：2750mm
+    整备质量：1850kg
+    
+    性能指标
+    0-100km/h加速：6.8秒
+    最高车速：200km/h
+    综合油耗：7.8L/100km
+    NEDC续航：650km
+    
+    安全配置
+    安全等级：C-NCAP 5星
+    主动安全：AEB、ACC、LKA
+    被动安全：6气囊、高强度钢车身
+    
+    测试验证
+    整车道路测试里程：50000km
+    耐久性测试：通过
+    排放标准：国六B
+    NVH测试：符合标准
+    
+    项目团队
+    项目经理：张工程师
+    设计团队：50人
+    测试团队：30人
+    总计团队规模：280人
+    
+    技术标准
+    执行标准：GB/T 19596-2017
+    工艺标准：ISO 9001-2015
+    环保标准：国六B排放法规
+    `;
     
     const analysisResult = generateDocumentAnalysis(contentToAnalyze, selectedDocumentType);
     console.log('分析结果:', analysisResult); // 调试日志
@@ -794,10 +1396,20 @@ const AIDocumentAnalyzer = ({ isVisible, onClose, documentContent = "" }) => {
             onChange={(e) => setSelectedDocumentType(e.target.value)}
           >
             <option value="general">通用文档</option>
-            <option value="contract">合同协议</option>
-            <option value="development_report">开发报告</option>
-            <option value="technical">技术规范</option>
-            <option value="development_plan">开发计划</option>
+            <optgroup label="车型研发相关">
+              <option value="vehicle_requirements">车型需求规格</option>
+              <option value="vehicle_design">车型设计方案</option>
+              <option value="vehicle_testing">车型测试验证</option>
+              <option value="vehicle_project">车型项目管理</option>
+            </optgroup>
+            <optgroup label="项目管理">
+              <option value="project_management">项目管理文档</option>
+              <option value="development_report">开发报告</option>
+            </optgroup>
+            <optgroup label="技术文档">
+              <option value="technical_spec">技术规范标准</option>
+              <option value="contract">合同协议</option>
+            </optgroup>
           </select>
         </div>
 

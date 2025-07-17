@@ -71,7 +71,64 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* 文档类型选择器 */
+/* 文档类型选择器优化 */
+.document-type-selector {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.document-type-selector label {
+  font-weight: 600;
+  color: #374151;
+  margin-right: 10px;
+}
+
+.document-type-selector select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+/* 车型研发相关的特殊样式 */
+.field-item.vehicle-spec {
+  border-left: 4px solid #10b981;
+}
+
+.field-item.vehicle-design {
+  border-left: 4px solid #8b5cf6;
+}
+
+.field-item.vehicle-testing {
+  border-left: 4px solid #f59e0b;
+}
+
+.field-item.vehicle-project {
+  border-left: 4px solid #ef4444;
+}
+
+.confidence-badge.vehicle-high {
+  background: #10b981;
+  color: white;
+}
+
+.conflict-item.parameter_inconsistency {
+  border-left: 4px solid #ef4444;
+}
+
+.conflict-item.design_inconsistency {
+  border-left: 4px solid #f59e0b;
+}
+
+.conflict-item.test_result_inconsistency {
+  border-left: 4px solid #dc2626;
+}
+
+/* 原有的文档类型选择器样式 */
 .document-type-selector {
   padding: 16px 20px;
   background: #f8fafc;

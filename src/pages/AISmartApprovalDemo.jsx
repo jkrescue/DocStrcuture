@@ -17,40 +17,40 @@ import './AISmartApprovalDemo.css';
 // 模拟文档数据
 const mockDocumentData = {
   id: 'doc_2024_001',
-  title: '2024年第一季度营销推广活动策划方案',
-  content: '本文档详细描述了2024年第一季度的营销推广活动策划，包括目标设定、预算分配、执行计划和风险评估等内容...',
-  type: 'marketing_plan',
-  category: '营销策划',
+  title: '新能源SUV车型开发项目技术规格书',
+  content: '本文档详细描述了新能源SUV车型的开发技术规格，包括动力系统设计、车身结构、安全配置、测试验证和项目计划等内容...',
+  type: 'vehicle_development',
+  category: '车型研发',
   createTime: '2024-01-15T09:30:00Z',
   author: {
     id: 'user_001',
-    name: '张三',
-    role: '营销经理',
-    avatar: '👨‍💼'
+    name: '张工程师',
+    role: '车型项目经理',
+    avatar: '👨‍�'
   },
   metadata: {
-    budget: 850000,
-    duration: '3个月',
-    targetAudience: '25-40岁城市白领',
-    channels: ['社交媒体', '线下活动', '内容营销'],
-    expectedROI: '150%'
+    budget: 1500000000, // 15亿元
+    duration: '36个月',
+    targetMarket: '中高端新能源SUV市场',
+    vehicleType: ['纯电动', 'SUV', '中大型'],
+    expectedSOP: '2025年12月'
   },
   sections: [
     { id: 'overview', title: '项目概述', status: 'completed' },
-    { id: 'objectives', title: '目标设定', status: 'completed' },
-    { id: 'budget', title: '预算规划', status: 'in_review' },
-    { id: 'timeline', title: '执行时间线', status: 'completed' },
-    { id: 'risks', title: '风险评估', status: 'in_review' },
-    { id: 'metrics', title: '效果衡量', status: 'pending' }
+    { id: 'powertrain', title: '动力系统设计', status: 'completed' },
+    { id: 'structure', title: '车身结构规划', status: 'in_review' },
+    { id: 'timeline', title: '开发时间线', status: 'completed' },
+    { id: 'testing', title: '测试验证计划', status: 'in_review' },
+    { id: 'quality', title: '质量保证标准', status: 'pending' }
   ]
 };
 
 // 模拟当前用户
 const mockCurrentUser = {
   id: 'user_002',
-  name: '李四',
-  role: '营销总监',
-  avatar: '👩‍💼',
+  name: '李总工',
+  role: '技术总监',
+  avatar: '�‍�',
   permissions: ['approve', 'comment', 'edit']
 };
 
@@ -61,42 +61,42 @@ const mockApprovalFlow = {
   steps: [
     {
       id: 'step_1',
-      name: '部门负责人审批',
+      name: '技术评审',
       assignee: {
         id: 'user_002',
-        name: '李四',
-        role: '营销总监',
-        avatar: '👩‍💼'
+        name: '李总工',
+        role: '技术总监',
+        avatar: '�‍�'
       },
       status: 'pending',
       dueDate: '2024-01-20T18:00:00Z',
-      description: '审核营销策略和预算合理性'
+      description: '审核技术方案可行性和规格合理性'
     },
     {
       id: 'step_2', 
-      name: '财务部门审批',
+      name: '质量标准审核',
       assignee: {
         id: 'user_003',
-        name: '王五',
-        role: '财务经理',
-        avatar: '👨‍💻'
+        name: '王质量',
+        role: '质量经理',
+        avatar: '�'
       },
       status: 'pending',
       dueDate: '2024-01-22T18:00:00Z',
-      description: '审核预算分配和财务可行性'
+      description: '审核车型质量标准和测试计划'
     },
     {
       id: 'step_3',
-      name: '总经理审批',
+      name: '项目投资决策',
       assignee: {
         id: 'user_004',
-        name: '赵六',
-        role: '总经理',
+        name: '赵总裁',
+        role: '公司总裁',
         avatar: '👔'
       },
       status: 'pending',
       dueDate: '2024-01-25T18:00:00Z',
-      description: '最终审批决策'
+      description: '最终投资决策和项目启动批准'
     }
   ],
   currentStep: 0,
@@ -123,7 +123,7 @@ const AISmartApprovalDemo = () => {
         <div className="header-content">
           <div className="header-info">
             <h1>AI智能审批助手演示</h1>
-            <p>体验基于人工智能的智能协作与审批建议功能</p>
+            <p>体验基于人工智能的车型研发项目智能协作与审批建议功能</p>
           </div>
           
           <div className="header-stats">
@@ -197,12 +197,20 @@ const AISmartApprovalDemo = () => {
                 </span>
               </div>
               <div className="meta-item">
-                <span className="meta-label">预算金额:</span>
-                <span className="meta-value">¥{mockDocumentData.metadata.budget.toLocaleString()}</span>
+                <span className="meta-label">项目预算:</span>
+                <span className="meta-value">¥{(mockDocumentData.metadata.budget / 100000000).toFixed(1)}亿元</span>
               </div>
               <div className="meta-item">
-                <span className="meta-label">项目周期:</span>
+                <span className="meta-label">开发周期:</span>
                 <span className="meta-value">{mockDocumentData.metadata.duration}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">目标市场:</span>
+                <span className="meta-value">{mockDocumentData.metadata.targetMarket}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">预计SOP:</span>
+                <span className="meta-value">{mockDocumentData.metadata.expectedSOP}</span>
               </div>
             </div>
           </div>
@@ -279,24 +287,24 @@ const AISmartApprovalDemo = () => {
                   <h3>项目摘要</h3>
                   <div className="summary-cards">
                     <div className="summary-card">
-                      <div className="summary-icon">🎯</div>
+                      <div className="summary-icon">🚗</div>
                       <div className="summary-content">
-                        <h4>目标受众</h4>
-                        <p>{mockDocumentData.metadata.targetAudience}</p>
+                        <h4>车型定位</h4>
+                        <p>{mockDocumentData.metadata.targetMarket}</p>
                       </div>
                     </div>
                     <div className="summary-card">
-                      <div className="summary-icon">📈</div>
+                      <div className="summary-icon">⚡</div>
                       <div className="summary-content">
-                        <h4>预期ROI</h4>
-                        <p>{mockDocumentData.metadata.expectedROI}</p>
+                        <h4>产品类型</h4>
+                        <p>{mockDocumentData.metadata.vehicleType.join(' + ')}</p>
                       </div>
                     </div>
                     <div className="summary-card">
-                      <div className="summary-icon">📢</div>
+                      <div className="summary-icon">�</div>
                       <div className="summary-content">
-                        <h4>推广渠道</h4>
-                        <p>{mockDocumentData.metadata.channels.join(', ')}</p>
+                        <h4>预计SOP</h4>
+                        <p>{mockDocumentData.metadata.expectedSOP}</p>
                       </div>
                     </div>
                   </div>
@@ -310,7 +318,7 @@ const AISmartApprovalDemo = () => {
               <div className="approval-header">
                 <h2>审批流程管理</h2>
                 <div className="flow-status">
-                  <span className="status-text">当前状态: 等待营销总监审批</span>
+                  <span className="status-text">当前状态: 等待技术总监审批</span>
                   <div className="progress-indicator">
                     <div className="progress-step completed"></div>
                     <div className="progress-step active"></div>
@@ -359,8 +367,8 @@ const AISmartApprovalDemo = () => {
                         <span className="risk-label">潜在风险</span>
                       </div>
                       <ul className="risk-list">
-                        <li>预算超出同类项目15%</li>
-                        <li>部分条款需法务确认</li>
+                        <li>项目预算较同类车型高20%</li>
+                        <li>技术方案需进一步验证</li>
                       </ul>
                     </div>
                   </div>
