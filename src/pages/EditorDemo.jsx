@@ -36,7 +36,7 @@ import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
 import RelationshipManagerEnhanced from '../components/RelationshipManager/RelationshipManagerEnhanced';
 import SimpleCollaborationPanel from '../components/CollaborationPanel/SimpleCollaborationPanel';
-import AIDocumentAnalyzer from '../components/AIAssistant/AIDocumentAnalyzer_Fixed';
+import AIDocumentAnalyzer from '../components/AIAssistant/AIDocumentAnalyzer_Enhanced';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -408,7 +408,8 @@ const EditorDemo = () => {
                   transition: 'all 0.3s ease'
                 }}>
                   <AIDocumentAnalyzer 
-                    document={currentDocument}
+                    isVisible={showAIAnalyzer}
+                    documentContent={currentDocument.content ? JSON.stringify(currentDocument.content) : currentDocument.title || ""}
                     onClose={() => setShowAIAnalyzer(false)}
                   />
                 </div>

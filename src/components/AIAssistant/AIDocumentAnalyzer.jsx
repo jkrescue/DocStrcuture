@@ -32,9 +32,9 @@ import {
 } from 'lucide-react';
 import './AIDocumentAnalyzer.css';
 
-// 模拟AI分析结果
+// 基于AI_support.md规范的AI分析结果生成器
 const generateDocumentAnalysis = (content, documentType = 'general') => {
-  // 根据文档类型和内容生成不同的分析结果
+  // 基础分析信息
   const baseAnalysis = {
     confidence: Math.random() * 0.3 + 0.7, // 70-100%
     processingTime: Math.random() * 2000 + 1000, // 1-3秒
@@ -43,6 +43,9 @@ const generateDocumentAnalysis = (content, documentType = 'general') => {
 
   // 智能检测文档类型
   const detectedType = (() => {
+    if (content.includes('开发') && (content.includes('进度') || content.includes('周报'))) {
+      return 'development_report';
+    }
     if (content.includes('合同') || content.includes('协议') || content.includes('签约') || content.includes('甲方') || content.includes('乙方')) {
       return 'contract';
     }
@@ -57,43 +60,613 @@ const generateDocumentAnalysis = (content, documentType = 'general') => {
 
   const finalType = documentType !== 'general' ? documentType : detectedType;
 
-  // 合同文档分析
-  if (finalType === 'contract') {
+    }
+    if (content.includes('技术') || content.includes('规范') || content.includes('标准') || content.includes('API') || content.includes('接口')) {
+      return 'technical';
+    }
+    if (content.includes('开发') || content.includes('计划') || content.includes('项目') || content.includes('里程碑')) {
+      return 'development_plan';
+    }
+    return 'general';
+  })();
+
+  const finalType = documentType !== 'general' ? documentType : detectedType;
+
+  // 根据AI_support.md规范生成四大核心功能分析
+  return {
+    ...baseAnalysis,
+    documentType: finalType,
+    
+    // 1. 【信息抽取自动化】- 核心功能
+    extractedFields: generateExtractedFields(content, finalType),
+    
+    // 2. 【段落冲突检测】- 核心功能  
+    conflictDetection: generateConflictDetection(content, finalType),
+    
+    // 3. 【引用合规性校验】- 核心功能
+    referenceValidation: generateReferenceValidation(content, finalType),
+    
+    // 4. 【校核工作流】- 核心功能
+    auditWorkflow: generateAuditWorkflow(content, finalType),
+    
+    // AI分析总结
+    summary: {
+      totalFields: 0,
+      conflictsFound: 0,
+      referencesChecked: 0,
+      auditStatus: 'pending'
+    }
+  };
+};
+
+// 1. 信息抽取自动化功能
+const generateExtractedFields = (content, documentType) => {
+  const baseFields = [];
+  
+  // 根据文档类型提取不同的关键字段
+  if (documentType === 'contract') {
     return {
-      ...baseAnalysis,
-      documentType: 'contract',
-      extractedData: {
-        tables: [
-          {
-            id: 'contract_info',
-            title: '合同关键信息',
-            type: 'contract',
-            rows: 8,
-            columns: 2,
-            confidence: 0.94,
-            data: [
-              ['字段', '值'],
-              ['合同编号', 'CT-2024-0156'],
-              ['合同名称', '软件开发服务协议'],
-              ['甲方', '某科技有限公司'],
-              ['乙方', '技术服务提供商'],
-              ['签约日期', '2024-07-15'],
-              ['合同金额', '¥850,000'],
-              ['履行期限', '2024-08-01 至 2024-12-31']
-            ],
-            insights: [
-              '合同金额较大，建议设置分期付款节点',
-              '履行期限跨度5个月，需要明确里程碑交付',
-              '建议补充违约责任和知识产权条款'
-            ]
-          }
-        ],
-        keyInfo: [
-          { type: 'contract_number', label: '合同编号', value: 'CT-2024-0156', confidence: 0.95, source: '自动识别', location: '第1段' },
-          { type: 'currency', label: '合同金额', value: '¥850,000', confidence: 0.92, source: '数字识别', location: '第3段' },
-          { type: 'date', label: '签约日期', value: '2024-07-15', confidence: 0.88, source: '日期提取', location: '第2段' },
-          { type: 'date', label: '履行期限', value: '2024-08-01 至 2024-12-31', confidence: 0.90, source: '日期范围', location: '第4段' },
-          { type: 'person', label: '甲方代表', value: '张总经理', confidence: 0.85, source: '实体识别', location: '第5段' },
+      title: '自动提取字段',
+      description: '基于合同模板自动识别关键信息',
+      fields: [
+        { 
+          id: 'contract_number',
+          label: '合同编号', 
+          value: 'CT-2024-0156', 
+          confidence: 0.95,
+          source: 'OCR识别',
+          location: '文档头部',
+          editable: true,
+          validated: false,
+          extractionMethod: 'AI + 规则引擎'
+        },
+        { 
+          id: 'contract_amount',
+          label: '合同金额', 
+          value: '¥850,000', 
+          confidence: 0.92,
+          source: '数字识别',
+          location: '第3段',
+          editable: true,
+          validated: false,
+          extractionMethod: 'NLP数字识别'
+        },
+        { 
+          id: 'sign_date',
+          label: '签约日期', 
+          value: '2024-07-15', 
+          confidence: 0.88,
+          source: '日期提取',
+          location: '第2段',
+          editable: true,
+          validated: false,
+          extractionMethod: '日期模式匹配'
+        },
+        { 
+          id: 'party_a',
+          label: '甲方', 
+          value: '某科技有限公司', 
+          confidence: 0.90,
+          source: '实体识别',
+          location: '第1段',
+          editable: true,
+          validated: false,
+          extractionMethod: 'NLP实体识别'
+        },
+        { 
+          id: 'party_b',
+          label: '乙方', 
+          value: '技术服务提供商', 
+          confidence: 0.87,
+          source: '实体识别',
+          location: '第1段',
+          editable: true,
+          validated: false,
+          extractionMethod: 'NLP实体识别'
+        },
+        { 
+          id: 'duration',
+          label: '履行期限', 
+          value: '2024-08-01 至 2024-12-31', 
+          confidence: 0.85,
+          source: '时间范围识别',
+          location: '第4段',
+          editable: true,
+          validated: false,
+          extractionMethod: '时间范围解析'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'contract_template_v2.1',
+      autoRecognitionPatterns: [
+        '合同编号模式: CT-YYYY-NNNN',
+        '金额模式: ¥数字+万/元',
+        '日期模式: YYYY-MM-DD',
+        '公司实体模式: XX有限公司/XX股份有限公司'
+      ]
+    };
+  }
+  
+  if (documentType === 'development_report') {
+    return {
+      title: '自动提取字段',
+      description: '基于开发报告模板自动识别进度信息',
+      fields: [
+        { 
+          id: 'report_date',
+          label: '报告日期', 
+          value: '2025年7月17日', 
+          confidence: 0.98,
+          source: 'OCR识别',
+          location: '文档标题',
+          editable: true,
+          validated: true,
+          extractionMethod: 'OCR + 日期解析'
+        },
+        { 
+          id: 'report_period',
+          label: '报告周期', 
+          value: '第29周', 
+          confidence: 0.85,
+          source: '时间计算',
+          location: '副标题',
+          editable: true,
+          validated: false,
+          extractionMethod: '周期计算'
+        },
+        { 
+          id: 'total_tasks',
+          label: '总任务数', 
+          value: '5个功能', 
+          confidence: 0.95,
+          source: '表格统计',
+          location: '进度表',
+          editable: true,
+          validated: true,
+          extractionMethod: '表格数据统计'
+        },
+        { 
+          id: 'completion_rate',
+          label: '完成率', 
+          value: '100%', 
+          confidence: 0.92,
+          source: '进度计算',
+          location: '进度表分析',
+          editable: true,
+          validated: true,
+          extractionMethod: '百分比计算'
+        },
+        { 
+          id: 'team_members',
+          label: '参与人员', 
+          value: '5人', 
+          confidence: 0.89,
+          source: '人员识别',
+          location: '责任人列',
+          editable: true,
+          validated: false,
+          extractionMethod: 'NLP人员提取'
+        },
+        { 
+          id: 'issues_count',
+          label: '问题数量', 
+          value: '3个', 
+          confidence: 0.91,
+          source: '问题统计',
+          location: '问题表',
+          editable: true,
+          validated: false,
+          extractionMethod: '问题分类统计'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'development_report_template_v1.0',
+      autoRecognitionPatterns: [
+        '日期模式: YYYY年MM月DD日',
+        '周期模式: 第NN周',
+        '百分比模式: NN%',
+        '人员模式: 姓名 + 角色'
+      ]
+    };
+  }
+  
+  if (documentType === 'technical') {
+    return {
+      title: '自动提取字段',
+      description: '基于技术文档模板自动识别规范信息',
+      fields: [
+        { 
+          id: 'api_version',
+          label: 'API版本', 
+          value: 'v2.1.0', 
+          confidence: 0.93,
+          source: '版本标识',
+          location: '文档头部',
+          editable: true,
+          validated: true,
+          extractionMethod: '版本号模式识别'
+        },
+        { 
+          id: 'api_count',
+          label: '接口数量', 
+          value: '15个', 
+          confidence: 0.95,
+          source: '计数统计',
+          location: '全文扫描',
+          editable: true,
+          validated: false,
+          extractionMethod: 'API接口计数'
+        },
+        { 
+          id: 'auth_method',
+          label: '认证方式', 
+          value: 'JWT Token', 
+          confidence: 0.89,
+          source: '技术识别',
+          location: '认证章节',
+          editable: true,
+          validated: false,
+          extractionMethod: '技术术语识别'
+        },
+        { 
+          id: 'data_format',
+          label: '数据格式', 
+          value: 'JSON', 
+          confidence: 0.94,
+          source: '格式检测',
+          location: '数据格式章节',
+          editable: true,
+          validated: true,
+          extractionMethod: '格式标准识别'
+        }
+      ],
+      exportFormats: ['JSON', 'CSV', 'Excel'],
+      template: 'technical_doc_template_v1.5',
+      autoRecognitionPatterns: [
+        '版本模式: vN.N.N',
+        'API路径模式: /api/xxx',
+        '认证模式: JWT|OAuth|Basic',
+        '格式模式: JSON|XML|YAML'
+      ]
+    };
+  }
+  
+  // 通用文档字段提取
+  return {
+    title: '自动提取字段',
+    description: '基于通用模板自动识别常见信息',
+    fields: [
+      { 
+        id: 'document_title',
+        label: '文档标题', 
+        value: '未识别', 
+        confidence: 0.70,
+        source: '标题识别',
+        location: '文档开头',
+        editable: true,
+        validated: false,
+        extractionMethod: '文档结构分析'
+      },
+      { 
+        id: 'creation_date',
+        label: '创建日期', 
+        value: '2025-07-17', 
+        confidence: 0.85,
+        source: '日期识别',
+        location: '元数据',
+        editable: true,
+        validated: false,
+        extractionMethod: '日期模式匹配'
+      }
+    ],
+    exportFormats: ['JSON', 'CSV'],
+    template: 'general_template_v1.0',
+    autoRecognitionPatterns: [
+      '日期模式: YYYY-MM-DD',
+      '邮箱模式: xxx@xxx.xxx',
+      '电话模式: 1XX-XXXX-XXXX'
+    ]
+  };
+};
+
+// 2. 段落冲突检测功能
+const generateConflictDetection = (content, documentType) => {
+  const conflicts = [];
+  
+  // 模拟检测到的冲突
+  if (documentType === 'development_plan') {
+    conflicts.push({
+      id: 'conflict_1',
+      type: 'content_inconsistency',
+      severity: 'medium',
+      title: '技术栈描述不一致',
+      description: '第3段与第5段关于前端框架的描述存在冲突',
+      sourceLocation: { paragraph: 3, sentence: 2 },
+      conflictLocation: { paragraph: 5, sentence: 1 },
+      sourceContent: '我们将使用React 18进行前端开发',
+      conflictContent: '前端采用Vue 3框架实现',
+      detectionMethod: '文本相似度 + 预定义规则',
+      confidence: 0.87,
+      suggestion: '建议统一为React 18，确保技术栈一致性',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+    
+    conflicts.push({
+      id: 'conflict_2',
+      type: 'definition_mismatch',
+      severity: 'low',
+      title: '术语定义重复',
+      description: '第2段和第4段都定义了"用户权限"概念，描述略有差异',
+      sourceLocation: { paragraph: 2, sentence: 3 },
+      conflictLocation: { paragraph: 4, sentence: 2 },
+      sourceContent: '用户权限指系统中用户可执行的操作范围',
+      conflictContent: '用户权限是指用户在应用中的访问控制级别',
+      detectionMethod: '术语重复检测',
+      confidence: 0.73,
+      suggestion: '建议保留第一个定义，删除重复描述',
+      status: 'unresolved',
+      reviewRequired: false
+    });
+  }
+  
+  if (documentType === 'contract') {
+    conflicts.push({
+      id: 'conflict_3',
+      type: 'data_inconsistency',
+      severity: 'high',
+      title: '金额数据不一致',
+      description: '合同总金额在不同段落中出现了不同的数值',
+      sourceLocation: { paragraph: 2, sentence: 1 },
+      conflictLocation: { paragraph: 7, sentence: 3 },
+      sourceContent: '合同总金额为人民币850,000元',
+      conflictContent: '总价款为人民币800,000元',
+      detectionMethod: '数字模式匹配',
+      confidence: 0.95,
+      suggestion: '请核实正确金额，确保全文一致',
+      status: 'unresolved',
+      reviewRequired: true
+    });
+  }
+  
+  return {
+    title: '段落冲突检测',
+    description: '扫描文档内部发现的内容冲突和不一致',
+    totalConflicts: conflicts.length,
+    highSeverity: conflicts.filter(c => c.severity === 'high').length,
+    mediumSeverity: conflicts.filter(c => c.severity === 'medium').length,
+    lowSeverity: conflicts.filter(c => c.severity === 'low').length,
+    conflicts: conflicts,
+    detectionMethods: [
+      '文本相似度匹配',
+      '预定义规则比对',
+      '术语一致性检查',
+      '数字数据校验'
+    ],
+    autoResolutionSuggestions: conflicts.length > 0,
+    lastScanTime: new Date().toISOString()
+  };
+};
+
+// 3. 引用合规性校验功能
+const generateReferenceValidation = (content, documentType) => {
+  const references = [];
+  
+  // 模拟检测到的引用问题
+  if (documentType === 'development_plan') {
+    references.push({
+      id: 'ref_1',
+      type: 'title_mismatch',
+      severity: 'medium',
+      title: '引用章节标题已变更',
+      description: '引用的设计规范文档标题已更新',
+      referenceLocation: { paragraph: 4, sentence: 2 },
+      sourceDocument: 'UI设计规范V2.0.docx',
+      originalTitle: '用户界面设计原则',
+      currentTitle: '用户体验设计规范',
+      lastChecked: '2025-07-17T10:30:00Z',
+      syncStatus: 'out_of_sync',
+      permissionStatus: 'accessible',
+      suggestion: '建议更新引用标题以保持一致性',
+      autoUpdateAvailable: true
+    });
+    
+    references.push({
+      id: 'ref_2',
+      type: 'content_structure_change',
+      severity: 'low',
+      title: '引用表格结构调整',
+      description: '源文档中的数据表格增加了新列',
+      referenceLocation: { paragraph: 6, sentence: 1 },
+      sourceDocument: '数据库设计文档V1.2.docx',
+      originalStructure: '用户表: ID, 姓名, 邮箱',
+      currentStructure: '用户表: ID, 姓名, 邮箱, 创建时间, 状态',
+      lastChecked: '2025-07-17T10:30:00Z',
+      syncStatus: 'partially_synced',
+      permissionStatus: 'accessible',
+      suggestion: '考虑是否需要更新引用的表格描述',
+      autoUpdateAvailable: false
+    });
+  }
+  
+  if (documentType === 'technical') {
+    references.push({
+      id: 'ref_3',
+      type: 'permission_issue',
+      severity: 'high',
+      title: '引用内容权限不足',
+      description: '引用的内部API文档需要更高权限访问',
+      referenceLocation: { paragraph: 3, sentence: 4 },
+      sourceDocument: '内部API密钥管理.docx',
+      originalTitle: 'API密钥配置说明',
+      currentTitle: '无法访问',
+      lastChecked: '2025-07-17T10:30:00Z',
+      syncStatus: 'access_denied',
+      permissionStatus: 'insufficient',
+      suggestion: '联系文档管理员获取访问权限或移除敏感引用',
+      autoUpdateAvailable: false
+    });
+  }
+  
+  return {
+    title: '引用合规性校验',
+    description: '检查文档间引用关系的一致性和权限',
+    totalReferences: references.length + 3, // 假设还有其他正常引用
+    issuesFound: references.length,
+    syncedReferences: 3,
+    outOfSyncReferences: references.filter(r => r.syncStatus === 'out_of_sync').length,
+    accessDeniedReferences: references.filter(r => r.permissionStatus === 'insufficient').length,
+    references: references,
+    validationMethods: [
+      '源文档版本比对',
+      '权限状态检查',
+      '结构一致性验证',
+      '内容同步检测'
+    ],
+    autoSyncAvailable: references.some(r => r.autoUpdateAvailable),
+    lastValidationTime: new Date().toISOString()
+  };
+};
+
+// 4. 校核工作流功能
+const generateAuditWorkflow = (content, documentType) => {
+  const workflow = {
+    title: '校核工作流',
+    description: '专家审阅和内容校核流程管理',
+    currentStatus: 'in_progress',
+    documentStatus: 'under_review',
+    
+    // 工作流步骤
+    steps: [
+      {
+        id: 'step_1',
+        title: '提交校核',
+        description: '文档提交审核流程',
+        status: 'completed',
+        assignee: '张三（文档负责人）',
+        completedAt: '2025-07-17T09:00:00Z',
+        duration: '5分钟',
+        action: 'submit_for_review',
+        feedback: '文档已提交，等待专家审阅'
+      },
+      {
+        id: 'step_2', 
+        title: '专家审阅',
+        description: '资深专家进行内容审查',
+        status: 'in_progress',
+        assignee: '李四（技术专家）',
+        startedAt: '2025-07-17T09:15:00Z',
+        estimatedDuration: '2-4小时',
+        action: 'expert_review',
+        feedback: '正在审阅中，已完成60%'
+      },
+      {
+        id: 'step_3',
+        title: 'AI辅助校核',
+        description: 'AI自动检查术语统一性、格式规范等',
+        status: 'pending',
+        assignee: 'AI校核系统',
+        estimatedDuration: '10分钟',
+        action: 'ai_validation',
+        feedback: '等待专家审阅完成后启动'
+      },
+      {
+        id: 'step_4',
+        title: '反馈处理',
+        description: '根据专家意见修改文档',
+        status: 'pending',
+        assignee: '张三（文档负责人）',
+        estimatedDuration: '1-2小时',
+        action: 'feedback_processing',
+        feedback: '等待专家反馈'
+      },
+      {
+        id: 'step_5',
+        title: '复审确认',
+        description: '专家确认修改结果',
+        status: 'pending',
+        assignee: '李四（技术专家）',
+        estimatedDuration: '30分钟',
+        action: 'final_review',
+        feedback: '等待反馈处理完成'
+      },
+      {
+        id: 'step_6',
+        title: '发布批准',
+        description: '文档状态更新为已校核',
+        status: 'pending',
+        assignee: '系统自动',
+        estimatedDuration: '即时',
+        action: 'publish_approval',
+        feedback: '等待复审通过'
+      }
+    ],
+    
+    // 专家反馈（模拟当前进行中的审阅）
+    expertFeedback: [
+      {
+        id: 'feedback_1',
+        type: 'modification_suggestion',
+        severity: 'medium',
+        reviewer: '李四（技术专家）',
+        timestamp: '2025-07-17T10:45:00Z',
+        location: { paragraph: 2, sentence: 3 },
+        originalText: '系统采用微服务架构设计',
+        suggestion: '建议补充具体的微服务拆分原则和边界定义',
+        reason: '描述过于简单，缺少实施细节',
+        status: 'pending_response'
+      },
+      {
+        id: 'feedback_2',
+        type: 'terminology_check',
+        severity: 'low',
+        reviewer: '李四（技术专家）',
+        timestamp: '2025-07-17T10:50:00Z',
+        location: { paragraph: 5, sentence: 1 },
+        originalText: '前端框架',
+        suggestion: '建议统一使用"前端技术栈"术语',
+        reason: '与其他技术文档保持术语一致性',
+        status: 'pending_response'
+      }
+    ],
+    
+    // AI辅助校核项目
+    aiValidationChecks: [
+      {
+        id: 'ai_check_1',
+        name: '术语统一性检查',
+        description: '检查文档中技术术语的一致性使用',
+        status: 'ready',
+        estimatedTime: '2分钟'
+      },
+      {
+        id: 'ai_check_2',
+        name: '引用资料完整性',
+        description: '验证所有引用资料是否标注完整',
+        status: 'ready', 
+        estimatedTime: '3分钟'
+      },
+      {
+        id: 'ai_check_3',
+        name: '排版格式规范',
+        description: '检查文档格式是否符合组织规范',
+        status: 'ready',
+        estimatedTime: '5分钟'
+      }
+    ],
+    
+    // 流程统计
+    statistics: {
+      totalSteps: 6,
+      completedSteps: 1,
+      currentProgress: '16.7%',
+      estimatedCompletion: '2025-07-17T16:00:00Z',
+      averageReviewTime: '3.5小时',
+      expertWorkload: 'medium'
+    }
+  };
+  
+  return workflow;
           { type: 'person', label: '乙方代表', value: '李项目经理', confidence: 0.87, source: '实体识别', location: '第5段' }
         ],
         risks: [
@@ -475,7 +1048,16 @@ const AIDocumentAnalyzer = ({
           <div className="header-info">
             <h3>AI文档分析</h3>
             {analysis && (
-              <p>置信度 {Math.round(analysis.confidence * 100)}% • 已识别 {analysis.extractedData?.tables?.length || 0} 个表格</p>
+              <p>
+                {analysis.documentType === 'development_report' ? '📊 进度周报' : 
+                 analysis.documentType === 'contract' ? '📄 合同文档' :
+                 analysis.documentType === 'technical' ? '⚙️ 技术文档' :
+                 analysis.documentType === 'development_plan' ? '📋 开发计划' : '📝 通用文档'} 
+                 • OCR+版式识别 • 置信度 {Math.round(analysis.confidence * 100)}% • 已识别 {analysis.extractedData?.tables?.length || 0} 个表格
+              </p>
+            )}
+            {!analysis && (
+              <p>🔍 智能识别与信息提取 • 支持OCR与版式识别</p>
             )}
           </div>
         </div>
@@ -579,7 +1161,17 @@ const AIDocumentAnalyzer = ({
                           {table.type === 'schedule' && '时间表'}
                           {table.type === 'budget' && '预算表'}
                           {table.type === 'data' && '数据表'}
+                          {table.type === 'progress' && '进度表'}
+                          {table.type === 'issues' && '问题表'}
+                          {table.type === 'contract' && '合同表'}
+                          {table.type === 'technical' && '技术表'}
                         </span>
+                        {table.ocrMetadata && (
+                          <span className="ocr-badge">
+                            <Brain size={12} />
+                            OCR识别
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -664,7 +1256,17 @@ const AIDocumentAnalyzer = ({
                       <div className="keyinfo-label">{info.label}</div>
                       <div className="keyinfo-value">{info.value}</div>
                       <div className="keyinfo-meta">
-                        <span className="location">来源: {info.location}</span>
+                        <span className="source-method">
+                          {info.source === 'OCR识别' && <Brain size={12} />}
+                          {info.source === '表格统计' && <Table size={12} />}
+                          {info.source === '文本分析' && <FileSearch size={12} />}
+                          {info.source === '进度计算' && <BarChart3 size={12} />}
+                          {info.source === '人员识别' && <Users size={12} />}
+                          {info.source === '时间计算' && <Clock size={12} />}
+                          {info.source === '日期解析' && <Calendar size={12} />}
+                          {info.source || '自动识别'}
+                        </span>
+                        <span className="location">位置: {info.location}</span>
                         <span className="confidence">置信度 {Math.round(info.confidence * 100)}%</span>
                       </div>
                     </div>
@@ -685,6 +1287,51 @@ const AIDocumentAnalyzer = ({
                     </div>
                   </div>
                 ))}
+              </div>
+              
+              {/* 提取结果操作区 */}
+              <div className="extraction-actions">
+                <div className="extraction-summary">
+                  <h5>📋 提取摘要</h5>
+                  <p>已从文档中提取 {analysis.extractedData?.keyInfo?.length || 0} 个关键信息字段，包括日期、人员、进度等关键数据。</p>
+                </div>
+                
+                <div className="export-options">
+                  <button 
+                    className="export-btn json-export"
+                    onClick={() => {
+                      const exportData = {
+                        documentType: analysis.documentType,
+                        extractedAt: new Date().toISOString(),
+                        keyInfo: analysis.extractedData?.keyInfo || [],
+                        tables: analysis.extractedData?.tables || []
+                      };
+                      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `extracted_data_${new Date().getTime()}.json`;
+                      a.click();
+                    }}
+                  >
+                    <Download size={14} />
+                    导出 JSON
+                  </button>
+                  
+                  <button 
+                    className="export-btn template-export"
+                    onClick={() => {
+                      const templateData = analysis.extractedData?.keyInfo?.map(info => 
+                        `${info.label}: ${info.value}`
+                      ).join('\n') || '';
+                      navigator.clipboard.writeText(templateData);
+                      alert('模板数据已复制到剪贴板！');
+                    }}
+                  >
+                    <Copy size={14} />
+                    复制模板
+                  </button>
+                </div>
               </div>
             </div>
           )}
