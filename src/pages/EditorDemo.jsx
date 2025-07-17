@@ -36,6 +36,7 @@ import NewDocumentModal from '../components/NewDocumentModal/NewDocumentModal';
 import RelationshipManager from '../components/RelationshipManager/RelationshipManager';
 import RelationshipManagerEnhanced from '../components/RelationshipManager/RelationshipManagerEnhanced';
 import SimpleCollaborationPanel from '../components/CollaborationPanel/SimpleCollaborationPanel';
+import AIDocumentAnalyzer from '../components/AIAssistant/AIDocumentAnalyzer_Fixed';
 import { useDocStore } from '../stores/docStore';
 
 const EditorDemo = () => {
@@ -70,6 +71,7 @@ const EditorDemo = () => {
   const [showNewDocumentModal, setShowNewDocumentModal] = useState(false);
   const [showRelationshipManager, setShowRelationshipManager] = useState(false);
   const [showCollaborationPanel, setShowCollaborationPanel] = useState(false);
+  const [showAIAnalyzer, setShowAIAnalyzer] = useState(false);
 
   // 创建新文档
   const createNewDocument = (template = null) => {
@@ -263,6 +265,24 @@ const EditorDemo = () => {
                       关系管理
                     </button>
                     <button
+                      onClick={() => setShowAIAnalyzer(!showAIAnalyzer)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '6px 12px',
+                        border: `1px solid ${showAIAnalyzer ? '#667eea' : '#d1d5db'}`,
+                        borderRadius: '6px',
+                        background: showAIAnalyzer ? '#f3f4f6' : 'white',
+                        color: showAIAnalyzer ? '#667eea' : '#6b7280',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <Sparkles size={14} />
+                      AI分析
+                    </button>
+                    <button
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -300,9 +320,22 @@ const EditorDemo = () => {
             )}
 
             {/* 编辑器内容 */}
-            <div style={{ flex: 1, padding: '20px 40px', backgroundColor: '#fafbfc', overflow: 'auto' }}>
-              {currentDocument ? (
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ 
+              flex: 1, 
+              padding: '20px 40px', 
+              backgroundColor: '#fafbfc', 
+              overflow: 'auto',
+              display: 'flex',
+              gap: '20px'
+            }}>
+              {/* 主编辑区 */}
+              <div style={{ 
+                flex: showAIAnalyzer ? '1' : '1',
+                maxWidth: showAIAnalyzer ? 'calc(100% - 420px)' : '800px',
+                margin: showAIAnalyzer ? '0' : '0 auto',
+                transition: 'all 0.3s ease'
+              }}>
+                {currentDocument ? (
                   <BlockEditor
                     blocks={currentDocument.blocks || []}
                     onBlocksChange={handleBlocksChange}
@@ -310,44 +343,43 @@ const EditorDemo = () => {
                     enhanced={useEnhancedBlockEditor}
                     document={currentDocument}
                   />
-                </div>
-              ) : (
-                <div style={{ 
-                  textAlign: 'center', 
-                  padding: '60px 20px',
-                  color: '#6b7280'
-                }}>
-                  <Sparkles size={48} style={{ margin: '0 auto 20px', color: '#d1d5db' }} />
-                  <h3 style={{ fontSize: '20px', marginBottom: '8px', color: '#374151' }}>
-                    欢迎使用文档编辑器
-                  </h3>
-                  <p style={{ marginBottom: '20px' }}>
-                    开始创建你的第一个文档，或从模板中选择一个
-                  </p>
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                    <button
-                      onClick={() => setShowNewDocumentModal(true)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '12px 20px',
-                        backgroundColor: '#3b82f6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <Plus size={16} />
-                      新建文档
-                    </button>
-                    <button
-                      onClick={() => setActivePanel('templates')}
-                      style={{
-                        display: 'flex',
+                ) : (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '60px 20px',
+                    color: '#6b7280'
+                  }}>
+                    <Sparkles size={48} style={{ margin: '0 auto 20px', color: '#d1d5db' }} />
+                    <h3 style={{ fontSize: '20px', marginBottom: '8px', color: '#374151' }}>
+                      欢迎使用文档编辑器
+                    </h3>
+                    <p style={{ marginBottom: '20px' }}>
+                      开始创建你的第一个文档，或从模板中选择一个
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                      <button
+                        onClick={() => setShowNewDocumentModal(true)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '12px 20px',
+                          backgroundColor: '#3b82f6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Plus size={16} />
+                        新建文档
+                      </button>
+                      <button
+                        onClick={() => setActivePanel('templates')}
+                        style={{
+                          display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         padding: '12px 20px',
@@ -364,6 +396,21 @@ const EditorDemo = () => {
                       使用模板
                     </button>
                   </div>
+                </div>
+              )}
+              </div>
+              
+              {/* AI分析器侧边栏 */}
+              {showAIAnalyzer && currentDocument && (
+                <div style={{
+                  width: '400px',
+                  flexShrink: 0,
+                  transition: 'all 0.3s ease'
+                }}>
+                  <AIDocumentAnalyzer 
+                    document={currentDocument}
+                    onClose={() => setShowAIAnalyzer(false)}
+                  />
                 </div>
               )}
             </div>
